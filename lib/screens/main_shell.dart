@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../models/event_model.dart';
+import '../providers/event_provider.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_utils.dart';
@@ -39,9 +41,59 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  void _openAddEvent() {
+    final ep = context.read<EventProvider>();
+    final titleCtrl = TextEditingController();
+    final locationCtrl = TextEditingController();
+    showModalBottomSheet(
+      context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+        decoration: BoxDecoration(color: context.adaptiveSurface, borderRadius: const BorderRadius.vertical(top: Radius.circular(32))),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.outlineVariant, borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 20),
+          Text(tr(context, 'new_event'), style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700, color: context.textPrimary)),
+          const SizedBox(height: 20),
+          TextField(controller: titleCtrl, style: GoogleFonts.inter(fontSize: 15, color: context.textPrimary),
+              decoration: InputDecoration(hintText: tr(context, 'event_title_hint'), filled: true, fillColor: context.inputFill,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none))),
+          const SizedBox(height: 12),
+          TextField(controller: locationCtrl, style: GoogleFonts.inter(fontSize: 15, color: context.textPrimary),
+              decoration: InputDecoration(hintText: tr(context, 'location'), filled: true, fillColor: context.inputFill,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none))),
+          const SizedBox(height: 20),
+          SizedBox(width: double.infinity, height: 52,
+            child: ElevatedButton(
+              onPressed: () {
+                if (titleCtrl.text.trim().isEmpty) return;
+                ep.addEvent(Event(id: DateTime.now().millisecondsSinceEpoch.toString(), title: titleCtrl.text.trim(), location: locationCtrl.text.trim(), date: ep.selectedDate));
+                Navigator.of(ctx).pop();
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+              child: Text(tr(context, 'add_event'), style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
+
+  void _onFabTap() {
+    if (_currentIndex == 2) {
+      _openAddEvent();
+    } else {
+      _openAddTask();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<SettingsProvider>();
+    final isEventsTab = _currentIndex == 2;
+    final fabLabel = isEventsTab ? tr(context, 'new_event') : tr(context, 'new_task');
+    final fabIcon = isEventsTab ? Icons.event : Icons.add;
+
     return Scaffold(
       backgroundColor: context.adaptiveSurface,
       body: Stack(
@@ -57,13 +109,13 @@ class _MainShellState extends State<MainShell> {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: _openAddTask, borderRadius: BorderRadius.circular(24),
+                  onTap: _onFabTap, borderRadius: BorderRadius.circular(24),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      const Icon(Icons.add, color: Colors.white, size: 28),
+                      Icon(fabIcon, color: Colors.white, size: 28),
                       const SizedBox(width: 8),
-                      Text(tr(context, 'new_task'), style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
+                      Text(fabLabel, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
                     ]),
                   ),
                 ),
