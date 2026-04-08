@@ -13,6 +13,18 @@ class ChecklistItem {
     required this.title,
     this.isCompleted = false,
   });
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'title': title,
+        'isCompleted': isCompleted,
+      };
+
+  factory ChecklistItem.fromMap(Map<dynamic, dynamic> map) => ChecklistItem(
+        id: map['id'] as String,
+        title: map['title'] as String,
+        isCompleted: map['isCompleted'] as bool? ?? false,
+      );
 }
 
 class Task {
@@ -113,4 +125,39 @@ class Task {
 
   int get completedChecklistCount =>
       checklist.where((item) => item.isCompleted).length;
+
+  // --- Serialization ---
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'title': title,
+        'description': description,
+        'priority': priority.index,
+        'category': category.index,
+        'dueDate': dueDate.millisecondsSinceEpoch,
+        'dueTimeHour': dueTime.hour,
+        'dueTimeMinute': dueTime.minute,
+        'isCompleted': isCompleted,
+        'checklist': checklist.map((c) => c.toMap()).toList(),
+        'createdAt': createdAt.millisecondsSinceEpoch,
+      };
+
+  factory Task.fromMap(Map<dynamic, dynamic> map) => Task(
+        id: map['id'] as String,
+        title: map['title'] as String,
+        description: map['description'] as String? ?? '',
+        priority: TaskPriority.values[map['priority'] as int? ?? 1],
+        category: TaskCategory.values[map['category'] as int? ?? 0],
+        dueDate: DateTime.fromMillisecondsSinceEpoch(map['dueDate'] as int),
+        dueTime: TimeOfDay(
+          hour: map['dueTimeHour'] as int? ?? 9,
+          minute: map['dueTimeMinute'] as int? ?? 0,
+        ),
+        isCompleted: map['isCompleted'] as bool? ?? false,
+        checklist: (map['checklist'] as List<dynamic>?)
+                ?.map((c) => ChecklistItem.fromMap(c as Map<dynamic, dynamic>))
+                .toList() ??
+            [],
+        createdAt:
+            DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
+      );
 }

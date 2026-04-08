@@ -35,4 +35,41 @@ class Event {
 
   bool isOnDate(DateTime d) =>
       date.year == d.year && date.month == d.month && date.day == d.day;
+
+  // --- Serialization ---
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'title': title,
+        'location': location,
+        'date': date.millisecondsSinceEpoch,
+        'startTimeHour': startTime.hour,
+        'startTimeMinute': startTime.minute,
+        'endTimeHour': endTime.hour,
+        'endTimeMinute': endTime.minute,
+        // ignore: deprecated_member_use
+        'colorValue': color.value,
+        'iconCodePoint': icon.codePoint,
+        'iconFontFamily': icon.fontFamily,
+      };
+
+  factory Event.fromMap(Map<dynamic, dynamic> map) => Event(
+        id: map['id'] as String,
+        title: map['title'] as String,
+        location: map['location'] as String? ?? '',
+        date: DateTime.fromMillisecondsSinceEpoch(map['date'] as int),
+        startTime: TimeOfDay(
+          hour: map['startTimeHour'] as int? ?? 9,
+          minute: map['startTimeMinute'] as int? ?? 0,
+        ),
+        endTime: TimeOfDay(
+          hour: map['endTimeHour'] as int? ?? 10,
+          minute: map['endTimeMinute'] as int? ?? 0,
+        ),
+        // ignore: deprecated_member_use
+        color: Color(map['colorValue'] as int? ?? 0xFF4D41DF),
+        icon: IconData(
+          map['iconCodePoint'] as int? ?? Icons.event.codePoint,
+          fontFamily: map['iconFontFamily'] as String? ?? 'MaterialIcons',
+        ),
+      );
 }

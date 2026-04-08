@@ -18,6 +18,8 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(UserModelAdapter());
   await Hive.openBox<UserModel>('users');
+  await Hive.openBox('tasks');   // generic box for task maps
+  await Hive.openBox('events');  // generic box for event maps
 
   // Load settings eagerly
   final settings = SettingsProvider();
