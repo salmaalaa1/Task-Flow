@@ -7,6 +7,8 @@ import 'models/user_model.g.dart';
 import 'theme/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/task_provider.dart';
+import 'providers/team_provider.dart';
+import 'providers/team_task_provider.dart';
 import 'providers/event_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/splash_screen.dart';
@@ -20,6 +22,8 @@ void main() async {
   await Hive.openBox<UserModel>('users');
   await Hive.openBox('tasks');   // generic box for task maps
   await Hive.openBox('events');  // generic box for event maps
+  await Hive.openBox('team');    // generic box for team data
+  await Hive.openBox('team_tasks'); // generic box for team tasks
 
   // Load settings eagerly
   final settings = SettingsProvider();
@@ -39,6 +43,8 @@ class TaskFlowApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => TaskProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
+        ChangeNotifierProvider(create: (_) => TeamProvider()),
+        ChangeNotifierProvider(create: (_) => TeamTaskProvider()),
         ChangeNotifierProvider.value(value: settings),
       ],
       child: Consumer<SettingsProvider>(

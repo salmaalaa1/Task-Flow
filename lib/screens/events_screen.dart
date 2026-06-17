@@ -31,12 +31,6 @@ class EventsScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Text(tr(context, 'events'), style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: context.textPrimary)),
-              GestureDetector(
-                onTap: () => _showAddEventDialog(context, ep, sel),
-                child: Container(width: 40, height: 40,
-                    decoration: BoxDecoration(color: context.cardColorStrong, borderRadius: BorderRadius.circular(12)),
-                    child: Icon(Icons.add, size: 22, color: context.textSecondary)),
-              ),
             ]),
           ),
         ),

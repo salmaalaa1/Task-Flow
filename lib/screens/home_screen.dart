@@ -19,13 +19,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _searchController = TextEditingController();
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 
   String _greeting(BuildContext context) {
     final hour = DateTime.now().hour;
@@ -62,38 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      height: 44,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: context.cardColorStrong, borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: context.subtleShadow, blurRadius: 8, offset: const Offset(0, 2))],
-                      ),
-                      child: Row(children: [
-                        Icon(Icons.search, size: 20, color: context.textHint),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            onChanged: (q) => taskProvider.setSearch(q),
-                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: context.textPrimary),
-                            decoration: InputDecoration(
-                              hintText: tr(context, 'search_tasks'),
-                              hintStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: context.textHint),
-                              border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.zero,
-                            ),
-                          ),
-                        ),
-                        if (_searchController.text.isNotEmpty)
-                          GestureDetector(
-                            onTap: () { _searchController.clear(); taskProvider.setSearch(''); },
-                            child: Icon(Icons.close, size: 18, color: context.textSecondary),
-                          ),
-                      ]),
-                    ),
-                  ),
+                  const Spacer(),
                   const SizedBox(width: 12),
                   Container(
                     width: 40, height: 40,

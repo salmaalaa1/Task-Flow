@@ -43,10 +43,10 @@ class TaskProvider extends ChangeNotifier {
     // Apply filter
     switch (_activeFilter) {
       case 'Today':
-        tasks = tasks.where((t) => t.isToday).toList();
+        tasks = tasks.where((t) => !t.isCompleted).toList();
         break;
       case 'Upcoming':
-        tasks = tasks.where((t) => t.isUpcoming && !t.isCompleted).toList();
+        tasks = tasks.where((t) => !t.isCompleted).toList();
         break;
       case 'Done':
         tasks = tasks.where((t) => t.isCompleted).toList();
@@ -80,7 +80,7 @@ class TaskProvider extends ChangeNotifier {
     return tasks;
   }
 
-  List<Task> get todayTasks => _tasks.where((t) => t.isToday).toList();
+  List<Task> get todayTasks => _tasks.where((t) => !t.isCompleted).toList();
 
   List<Task> get urgentTasks =>
       _tasks.where((t) => t.priority == TaskPriority.urgent && !t.isCompleted).toList();
@@ -108,9 +108,9 @@ class TaskProvider extends ChangeNotifier {
     return List.generate(5, (i) {
       final day = now.subtract(Duration(days: 4 - i));
       final dayTasks = _tasks.where((t) =>
-          t.dueDate.year == day.year &&
-          t.dueDate.month == day.month &&
-          t.dueDate.day == day.day);
+          t.createdAt.year == day.year &&
+          t.createdAt.month == day.month &&
+          t.createdAt.day == day.day);
       if (dayTasks.isEmpty) return 0.0;
       return dayTasks.where((t) => t.isCompleted).length / dayTasks.length;
     });

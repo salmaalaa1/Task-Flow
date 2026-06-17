@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/team_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_utils.dart';
 import 'sign_in_screen.dart';
 import 'main_shell.dart';
+import 'owner_dashboard_screen.dart';
+import 'leader_dashboard_screen.dart';
+import 'member_dashboard_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -44,10 +48,42 @@ class _SplashScreenState extends State<SplashScreen>
     final isLoggedIn = await auth.tryAutoLogin();
 
     if (!mounted) return;
+
+    // Determine the destination screen
+    Widget destination;
+    if (!isLoggedIn) {
+      destination = const SignInScreen();
+    } else {
+      // Check if user has an active team session
+      final teamProvider = context.read<TeamProvider>();
+      if (teamProvider.isInTeam) {
+        // Restore team dashboard based on saved role
+        if (teamProvider.isOwner) {
+          destination = OwnerDashboardScreen(
+            teamName: teamProvider.teamName!,
+          );
+        } else if (teamProvider.isLeader) {
+          destination = LeaderDashboardScreen(
+            teamName: teamProvider.teamName!,
+            department: teamProvider.department ?? '',
+            userId: teamProvider.userId ?? '',
+          );
+        } else {
+          destination = MemberDashboardScreen(
+            teamName: teamProvider.teamName!,
+            department: teamProvider.department ?? '',
+            userId: teamProvider.userId ?? '',
+          );
+        }
+      } else {
+        destination = const MainShell();
+      }
+    }
+
+    if (!mounted) return;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) =>
-            isLoggedIn ? const MainShell() : const SignInScreen(),
+        pageBuilder: (_, __, ___) => destination,
         transitionsBuilder: (_, a, __, child) =>
             FadeTransition(opacity: a, child: child),
         transitionDuration: const Duration(milliseconds: 600),

@@ -7,6 +7,7 @@ import '../providers/settings_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_utils.dart';
 import '../l10n/translations.dart';
+import '../services/notification_service.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'home_screen.dart';
 import 'tasks_screen.dart';
@@ -68,7 +69,20 @@ class _MainShellState extends State<MainShell> {
               onPressed: () {
                 if (titleCtrl.text.trim().isEmpty) return;
                 ep.addEvent(Event(id: DateTime.now().millisecondsSinceEpoch.toString(), title: titleCtrl.text.trim(), location: locationCtrl.text.trim(), date: ep.selectedDate));
+                final sp = context.read<SettingsProvider>();
+                if (sp.soundEffects) {
+                  NotificationService.instance.playSound();
+                  NotificationService.instance.haptic();
+                }
                 Navigator.of(ctx).pop();
+                if (sp.notifications && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('📅 ${tr(context, 'event_created_msg')}', style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+                        backgroundColor: AppColors.primary, behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        duration: const Duration(seconds: 2)),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
               child: Text(tr(context, 'add_event'), style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
@@ -89,39 +103,44 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
-    context.watch<SettingsProvider>();
+    final sp = context.watch<SettingsProvider>();
     final isEventsTab = _currentIndex == 2;
+    final isSettingsTab = _currentIndex == 3;
     final fabLabel = isEventsTab ? tr(context, 'new_event') : tr(context, 'new_task');
     final fabIcon = isEventsTab ? Icons.event : Icons.add;
+    final isRtl = sp.isArabic;
 
     return Scaffold(
       backgroundColor: context.adaptiveSurface,
       body: Stack(
         children: [
           IndexedStack(index: _currentIndex, children: _screens),
-          Positioned(
-            right: 24, bottom: 96 + MediaQuery.of(context).padding.bottom,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient, borderRadius: BorderRadius.circular(24),
-                boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 30, offset: const Offset(0, 15))],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: _onFabTap, borderRadius: BorderRadius.circular(24),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Icon(fabIcon, color: Colors.white, size: 28),
-                      const SizedBox(width: 8),
-                      Text(fabLabel, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
-                    ]),
+          if (!isSettingsTab)
+            Positioned(
+              left: isRtl ? 24 : null,
+              right: isRtl ? null : 24,
+              bottom: 96 + MediaQuery.of(context).padding.bottom,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient, borderRadius: BorderRadius.circular(24),
+                  boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 30, offset: const Offset(0, 15))],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _onFabTap, borderRadius: BorderRadius.circular(24),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Icon(fabIcon, color: Colors.white, size: 28),
+                        const SizedBox(width: 8),
+                        Text(fabLabel, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
+                      ]),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
           Positioned(
             left: 0, right: 0, bottom: 0,
             child: BottomNavBar(currentIndex: _currentIndex, onTap: (i) => setState(() => _currentIndex = i)),

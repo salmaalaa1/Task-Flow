@@ -7,6 +7,7 @@ import '../providers/settings_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_utils.dart';
 import '../l10n/translations.dart';
+import '../services/notification_service.dart';
 
 class AddTaskScreen extends StatefulWidget {
   const AddTaskScreen({super.key});
@@ -19,8 +20,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   final _descController = TextEditingController();
   TaskPriority _priority = TaskPriority.medium;
   TaskCategory _category = TaskCategory.work;
-  DateTime _dueDate = DateTime.now();
-  TimeOfDay _dueTime = TimeOfDay.now();
+  TimeOfDay _startTime = TimeOfDay.now();
+  TimeOfDay _endTime = TimeOfDay(hour: (TimeOfDay.now().hour + 1) % 24, minute: TimeOfDay.now().minute);
 
   @override
   void dispose() {
@@ -43,9 +44,22 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       title: _titleController.text.trim(),
       description: _descController.text.trim(),
       priority: _priority, category: _category,
-      dueDate: _dueDate, dueTime: _dueTime,
+      startTime: _startTime, endTime: _endTime,
     );
+    final sp = context.read<SettingsProvider>();
     context.read<TaskProvider>().addTask(task);
+    if (sp.soundEffects) {
+      NotificationService.instance.playSound();
+      NotificationService.instance.haptic();
+    }
+    if (sp.notifications && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('✅ ${tr(context, 'task_created_msg')}', style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+            backgroundColor: AppColors.lowGreen, behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 2)),
+      );
+    }
     Navigator.of(context).pop();
   }
 
@@ -129,24 +143,23 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               }).toList()),
           ),
           const SizedBox(height: 24),
-          _sectionLabel(tr(context, 'due_date_time')),
+          _sectionLabel(tr(context, 'time_range')),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Row(children: [
               Expanded(child: GestureDetector(
                 onTap: () async {
-                  final date = await showDatePicker(context: context, initialDate: _dueDate,
-                      firstDate: DateTime.now().subtract(const Duration(days: 1)), lastDate: DateTime.now().add(const Duration(days: 365)));
-                  if (date != null) setState(() => _dueDate = date);
+                  final time = await showTimePicker(context: context, initialTime: _startTime);
+                  if (time != null) setState(() => _startTime = time);
                 },
-                child: _infoBox(Icons.calendar_today, '${_dueDate.day}/${_dueDate.month}/${_dueDate.year}'))),
+                child: _infoBox(Icons.play_arrow_rounded, '${tr(context, 'from')}: ${_formatTime(_startTime)}'))),
               const SizedBox(width: 12),
               Expanded(child: GestureDetector(
                 onTap: () async {
-                  final time = await showTimePicker(context: context, initialTime: _dueTime);
-                  if (time != null) setState(() => _dueTime = time);
+                  final time = await showTimePicker(context: context, initialTime: _endTime);
+                  if (time != null) setState(() => _endTime = time);
                 },
-                child: _infoBox(Icons.schedule, _formatTime(_dueTime)))),
+                child: _infoBox(Icons.stop_rounded, '${tr(context, 'to')}: ${_formatTime(_endTime)}'))),
             ]),
           ),
           const SizedBox(height: 40),

@@ -33,8 +33,8 @@ class Task {
   String description;
   TaskPriority priority;
   TaskCategory category;
-  DateTime dueDate;
-  TimeOfDay dueTime;
+  TimeOfDay startTime;
+  TimeOfDay endTime;
   bool isCompleted;
   List<ChecklistItem> checklist;
   final DateTime createdAt;
@@ -45,31 +45,29 @@ class Task {
     this.description = '',
     this.priority = TaskPriority.medium,
     this.category = TaskCategory.work,
-    DateTime? dueDate,
-    TimeOfDay? dueTime,
+    TimeOfDay? startTime,
+    TimeOfDay? endTime,
     this.isCompleted = false,
     List<ChecklistItem>? checklist,
     DateTime? createdAt,
-  })  : dueDate = dueDate ?? DateTime.now(),
-        dueTime = dueTime ?? TimeOfDay.now(),
+  })  : startTime = startTime ?? TimeOfDay.now(),
+        endTime = endTime ?? TimeOfDay(hour: (TimeOfDay.now().hour + 1) % 24, minute: TimeOfDay.now().minute),
         checklist = checklist ?? [],
         createdAt = createdAt ?? DateTime.now();
 
-  String get formattedTime {
-    final hour = dueTime.hourOfPeriod == 0 ? 12 : dueTime.hourOfPeriod;
-    final minute = dueTime.minute.toString().padLeft(2, '0');
-    final period = dueTime.period == DayPeriod.am ? 'AM' : 'PM';
+  static String _formatSingleTime(TimeOfDay t) {
+    final hour = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+    final minute = t.minute.toString().padLeft(2, '0');
+    final period = t.period == DayPeriod.am ? 'AM' : 'PM';
     return '$hour:$minute $period';
   }
 
-  bool get isToday {
-    final now = DateTime.now();
-    return dueDate.year == now.year &&
-        dueDate.month == now.month &&
-        dueDate.day == now.day;
+  String get formattedTime {
+    return '${_formatSingleTime(startTime)} – ${_formatSingleTime(endTime)}';
   }
 
-  bool get isUpcoming => dueDate.isAfter(DateTime.now()) && !isToday;
+  String get formattedStartTime => _formatSingleTime(startTime);
+  String get formattedEndTime => _formatSingleTime(endTime);
 
   Color get priorityColor {
     switch (priority) {
@@ -133,9 +131,10 @@ class Task {
         'description': description,
         'priority': priority.index,
         'category': category.index,
-        'dueDate': dueDate.millisecondsSinceEpoch,
-        'dueTimeHour': dueTime.hour,
-        'dueTimeMinute': dueTime.minute,
+        'startTimeHour': startTime.hour,
+        'startTimeMinute': startTime.minute,
+        'endTimeHour': endTime.hour,
+        'endTimeMinute': endTime.minute,
         'isCompleted': isCompleted,
         'checklist': checklist.map((c) => c.toMap()).toList(),
         'createdAt': createdAt.millisecondsSinceEpoch,
@@ -147,10 +146,13 @@ class Task {
         description: map['description'] as String? ?? '',
         priority: TaskPriority.values[map['priority'] as int? ?? 1],
         category: TaskCategory.values[map['category'] as int? ?? 0],
-        dueDate: DateTime.fromMillisecondsSinceEpoch(map['dueDate'] as int),
-        dueTime: TimeOfDay(
-          hour: map['dueTimeHour'] as int? ?? 9,
-          minute: map['dueTimeMinute'] as int? ?? 0,
+        startTime: TimeOfDay(
+          hour: map['startTimeHour'] as int? ?? map['dueTimeHour'] as int? ?? 9,
+          minute: map['startTimeMinute'] as int? ?? map['dueTimeMinute'] as int? ?? 0,
+        ),
+        endTime: TimeOfDay(
+          hour: map['endTimeHour'] as int? ?? ((map['dueTimeHour'] as int? ?? 9) + 1) % 24,
+          minute: map['endTimeMinute'] as int? ?? map['dueTimeMinute'] as int? ?? 0,
         ),
         isCompleted: map['isCompleted'] as bool? ?? false,
         checklist: (map['checklist'] as List<dynamic>?)

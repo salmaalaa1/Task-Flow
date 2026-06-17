@@ -3,10 +3,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/team_provider.dart';
+import '../providers/team_task_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_utils.dart';
 import '../l10n/translations.dart';
 import 'sign_in_screen.dart';
+import 'join_team_screen.dart';
+import 'create_team_screen.dart';
+import 'owner_dashboard_screen.dart';
+import 'leader_dashboard_screen.dart';
+import 'member_dashboard_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -69,9 +76,25 @@ class SettingsScreen extends StatelessWidget {
         _menuItemTap(Icons.language, tr(context, 'language'), sp.isArabic ? 'العربية' : 'English', () => _pickLanguage(context, sp), cardColor, borderColor),
         const SizedBox(height: 8),
         _menuItem(Icons.info_outline, tr(context, 'about'), 'v1.0.0', cardColor, borderColor),
-        const SizedBox(height: 8),
-        _menuItem(Icons.help_outline, tr(context, 'help_support'), '', cardColor, borderColor),
         const SizedBox(height: 24),
+        // Team button
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: () => _showTeamOptions(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 0,
+              ),
+              child: Text('Team', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
         // Sign out
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -110,6 +133,172 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
       ]),
+    );
+  }
+  void _showTeamOptions(BuildContext context) {
+    final teamProvider = context.read<TeamProvider>();
+
+    showModalBottomSheet(
+      context: context, backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(color: context.adaptiveSurface, borderRadius: const BorderRadius.vertical(top: Radius.circular(32))),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.outlineVariant, borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 20),
+          Text(tr(context, 'team'), style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 20),
+          if (teamProvider.isInTeam) ...[
+            // User is already in a team — show "Go to My Team" and "Leave Team"
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _navigateToTeamDashboard(context, teamProvider);
+                },
+                icon: const Icon(Icons.group_rounded, size: 20, color: Colors.white),
+                label: Text(tr(context, 'go_to_my_team'), style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _confirmLeaveTeam(context);
+                },
+                icon: const Icon(Icons.logout_rounded, size: 20, color: Color(0xFFEF4444)),
+                label: Text(
+                  teamProvider.isOwner ? tr(context, 'delete_team') : tr(context, 'leave_team'),
+                  style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: const Color(0xFFEF4444)),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+              ),
+            ),
+          ] else ...[
+            // User is NOT in a team — show Create / Join
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTeamScreen()));
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                child: Text(tr(context, 'create_team'), style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const JoinTeamScreen()));
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                child: Text(tr(context, 'join_team'), style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+        ]),
+      ),
+    );
+  }
+
+  void _navigateToTeamDashboard(BuildContext context, TeamProvider teamProvider) {
+    Widget destination;
+    if (teamProvider.isOwner) {
+      destination = OwnerDashboardScreen(teamName: teamProvider.teamName!);
+    } else if (teamProvider.isLeader) {
+      destination = LeaderDashboardScreen(
+        teamName: teamProvider.teamName!,
+        department: teamProvider.department ?? '',
+        userId: teamProvider.userId ?? '',
+      );
+    } else {
+      destination = MemberDashboardScreen(
+        teamName: teamProvider.teamName!,
+        department: teamProvider.department ?? '',
+        userId: teamProvider.userId ?? '',
+      );
+    }
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => destination),
+      (_) => false,
+    );
+  }
+
+  void _confirmLeaveTeam(BuildContext context) {
+    final teamProvider = context.read<TeamProvider>();
+    final isOwner = teamProvider.isOwner;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          isOwner ? tr(context, 'delete_team_q') : tr(context, 'leave_team_q'),
+          style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          isOwner
+              ? tr(context, 'delete_team_msg')
+              : tr(context, 'leave_team_msg'),
+          style: GoogleFonts.inter(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(tr(context, 'cancel'), style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.read<TeamProvider>().clearTeam();
+              context.read<TeamTaskProvider>().clearAll();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    isOwner ? tr(context, 'team_deleted') : tr(context, 'left_team'),
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w500),
+                  ),
+                  backgroundColor: AppColors.primary,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              );
+            },
+            child: Text(
+              isOwner ? tr(context, 'delete') : tr(context, 'leave_team'),
+              style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: const Color(0xFFEF4444)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

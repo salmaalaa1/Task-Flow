@@ -99,8 +99,6 @@ class TaskDetailScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Row(children: [
-              _infoChip(context, Icons.calendar_today, '${liveTask.dueDate.day}/${liveTask.dueDate.month}/${liveTask.dueDate.year}'),
-              const SizedBox(width: 12),
               _infoChip(context, Icons.schedule, liveTask.formattedTime),
             ]),
           ),

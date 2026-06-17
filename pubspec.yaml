@@ -59,14 +59,14 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "Gemini_Generated_Image_jql3r0jql3r0jql3.png"
+  image_path: "taskflow_icon.png"
   min_sdk_android: 21
   web:
     generate: true
-    image_path: "Gemini_Generated_Image_jql3r0jql3r0jql3.png"
+    image_path: "taskflow_icon.png"
   windows:
     generate: true
-    image_path: "Gemini_Generated_Image_jql3r0jql3r0jql3.png"
+    image_path: "taskflow_icon.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
