@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/team_provider.dart';
 import '../providers/team_task_provider.dart';
+import '../l10n/translations.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_utils.dart';
-import 'sign_in_screen.dart';
 import 'main_shell.dart';
 
 class MemberSettingsScreen extends StatelessWidget {
@@ -37,22 +37,13 @@ class MemberSettingsScreen extends StatelessWidget {
                   Container(
                     width: 40,
                     height: 40,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: context.chipBg,
-                    ),
-                    child: Center(
-                      child: Icon(Icons.person, size: 20, color: textSecondary),
-                    ),
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: context.chipBg),
+                    child: Center(child: Icon(Icons.person, size: 20, color: textSecondary)),
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    'Settings',
-                    style: GoogleFonts.manrope(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.blue.shade700,
-                    ),
+                    tr(context, 'team_settings'),
+                    style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.blue.shade700),
                   ),
                   const Spacer(),
                   Icon(Icons.notifications_outlined, size: 22, color: textSecondary),
@@ -73,13 +64,7 @@ class MemberSettingsScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: cardColor,
               borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                      BoxShadow(
-                        color: context.subtleShadow,
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+              boxShadow: [BoxShadow(color: context.subtleShadow, blurRadius: 16, offset: const Offset(0, 4))],
             ),
             child: Column(
               children: [
@@ -92,22 +77,10 @@ class MemberSettingsScreen extends StatelessWidget {
                       height: 100,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(26),
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFFFCD34D), Color(0xFFF59E0B)],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
+                        gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFFFCD34D), Color(0xFFF59E0B)]),
+                        boxShadow: [BoxShadow(color: const Color(0xFFF59E0B).withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 8))],
                       ),
-                      child: const Center(
-                        child: Icon(Icons.person, size: 46, color: Colors.white70),
-                      ),
+                      child: const Center(child: Icon(Icons.person, size: 46, color: Colors.white70)),
                     ),
                     // Edit badge
                     Positioned(
@@ -122,17 +95,9 @@ class MemberSettingsScreen extends StatelessWidget {
                             color: Colors.white,
                             shape: BoxShape.circle,
                             border: Border.all(color: const Color(0xFFE5E7EB), width: 2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
                           ),
-                          child: const Center(
-                            child: Icon(Icons.edit, size: 14, color: Color(0xFF3B82F6)),
-                          ),
+                          child: const Center(child: Icon(Icons.edit, size: 14, color: Color(0xFF3B82F6))),
                         ),
                       ),
                     ),
@@ -143,59 +108,35 @@ class MemberSettingsScreen extends StatelessWidget {
                 // MEMBER badge
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEF4444),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  decoration: BoxDecoration(color: const Color(0xFFEF4444), borderRadius: BorderRadius.circular(20)),
                   child: Text(
-                    'MEMBER',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 0.8,
-                    ),
+                    tr(context, 'member').toUpperCase(),
+                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.8),
                   ),
                 ),
                 const SizedBox(height: 16),
 
                 // Name
                 Text(
-                  user?.name ?? 'Alex Rivera',
-                  style: GoogleFonts.manrope(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w800,
-                    color: textPrimary,
-                  ),
+                  user?.name ?? tr(context, 'user_fallback'),
+                  style: GoogleFonts.manrope(fontSize: 26, fontWeight: FontWeight.w800, color: textPrimary),
                 ),
                 const SizedBox(height: 6),
 
                 // Email
                 Text(
-                  user?.email ?? 'alex.rivera@fluidworkspace.com',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: textSecondary,
-                  ),
+                  user?.email ?? '',
+                  style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400, color: textSecondary),
                 ),
                 const SizedBox(height: 16),
 
                 // DESIGNER badge
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF3B82F6),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  decoration: BoxDecoration(color: const Color(0xFF3B82F6), borderRadius: BorderRadius.circular(20)),
                   child: Text(
-                    'DESIGNER',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 0.8,
-                    ),
+                    tr(context, 'designer').toUpperCase(),
+                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.8),
                   ),
                 ),
               ],
@@ -209,20 +150,12 @@ class MemberSettingsScreen extends StatelessWidget {
             height: 56,
             child: ElevatedButton.icon(
               onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => const MainShell()),
-                  (_) => false,
-                );
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const MainShell()), (_) => false);
               },
               icon: const Icon(Icons.grid_view_rounded, size: 20, color: Colors.white),
               label: Text(
-                'Go to TaskFlow',
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
+                tr(context, 'go_to_taskflow'),
+                style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF3B82F6),
@@ -240,13 +173,8 @@ class MemberSettingsScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  'DANGER ZONE',
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFFEF4444),
-                    letterSpacing: 1.2,
-                  ),
+                  tr(context, 'danger_zone'),
+                  style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800, color: const Color(0xFFEF4444), letterSpacing: 1.2),
                 ),
               ),
               Expanded(child: Divider(color: labelColor.withValues(alpha: 0.2))),
@@ -259,34 +187,21 @@ class MemberSettingsScreen extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: isDark
-                  ? const Color(0xFF3A1A1A)
-                  : const Color(0xFFFEF2F2),
+              color: isDark ? const Color(0xFF3A1A1A) : const Color(0xFFFEF2F2),
               borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: const Color(0xFFEF4444).withValues(alpha: 0.1),
-              ),
+              border: Border.all(color: const Color(0xFFEF4444).withValues(alpha: 0.1)),
             ),
             child: Column(
               children: [
                 Text(
-                  'Leave Team',
-                  style: GoogleFonts.manrope(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: textPrimary,
-                  ),
+                  tr(context, 'leave_team'),
+                  style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w800, color: textPrimary),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'You will lose access to all shared tasks and workspace assets.',
+                  tr(context, 'leave_team_msg'),
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                    color: textSecondary,
-                    height: 1.4,
-                  ),
+                  style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w400, color: textSecondary, height: 1.4),
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
@@ -296,12 +211,8 @@ class MemberSettingsScreen extends StatelessWidget {
                     onPressed: () => _confirmLeaveTeam(context),
                     icon: const Icon(Icons.logout_rounded, size: 18, color: Colors.white),
                     label: Text(
-                      'Leave Team',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
+                      tr(context, 'leave_team'),
+                      style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFEF4444),
@@ -319,13 +230,7 @@ class MemberSettingsScreen extends StatelessWidget {
           Center(
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                _dot(labelColor.withValues(alpha: 0.3)),
-                const SizedBox(width: 6),
-                _dot(labelColor.withValues(alpha: 0.3)),
-                const SizedBox(width: 6),
-                _dot(labelColor.withValues(alpha: 0.3)),
-              ],
+              children: [_dot(labelColor.withValues(alpha: 0.3)), const SizedBox(width: 6), _dot(labelColor.withValues(alpha: 0.3)), const SizedBox(width: 6), _dot(labelColor.withValues(alpha: 0.3))],
             ),
           ),
         ],
@@ -337,10 +242,7 @@ class MemberSettingsScreen extends StatelessWidget {
     return Container(
       width: 7,
       height: 7,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
     );
   }
 
@@ -349,7 +251,6 @@ class MemberSettingsScreen extends StatelessWidget {
     if (user == null) return;
     final nameCtrl = TextEditingController(text: user.name);
     final emailCtrl = TextEditingController(text: user.email);
-    final isDark = context.isDark;
     final surfaceColor = context.cardColor;
 
     showModalBottomSheet(
@@ -365,28 +266,24 @@ class MemberSettingsScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.outlineVariant, borderRadius: BorderRadius.circular(2))),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(color: AppColors.outlineVariant, borderRadius: BorderRadius.circular(2)),
+            ),
             const SizedBox(height: 20),
-            Text('Edit Profile', style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700)),
+            Text(tr(context, 'edit_profile'), style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700)),
             const SizedBox(height: 20),
             TextField(
               controller: nameCtrl,
               style: GoogleFonts.inter(fontSize: 15),
-              decoration: InputDecoration(
-                labelText: 'Full Name',
-                labelStyle: GoogleFonts.inter(fontSize: 13),
-                prefixIcon: const Icon(Icons.person_outline, size: 20),
-              ),
+              decoration: InputDecoration(labelText: tr(context, 'full_name'), labelStyle: GoogleFonts.inter(fontSize: 13), prefixIcon: const Icon(Icons.person_outline, size: 20)),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: emailCtrl,
               style: GoogleFonts.inter(fontSize: 15),
-              decoration: InputDecoration(
-                labelText: 'Email',
-                labelStyle: GoogleFonts.inter(fontSize: 13),
-                prefixIcon: const Icon(Icons.email_outlined, size: 20),
-              ),
+              decoration: InputDecoration(labelText: tr(context, 'email'), labelStyle: GoogleFonts.inter(fontSize: 13), prefixIcon: const Icon(Icons.email_outlined, size: 20)),
             ),
             const SizedBox(height: 20),
             SizedBox(
@@ -399,7 +296,7 @@ class MemberSettingsScreen extends StatelessWidget {
                     Navigator.of(ctx).pop();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Profile updated', style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+                        content: Text(tr(context, 'profile_updated'), style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
                         backgroundColor: AppColors.lowGreen,
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -411,7 +308,10 @@ class MemberSettingsScreen extends StatelessWidget {
                   backgroundColor: Colors.blue,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: Text('Save', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
+                child: Text(
+                  tr(context, 'save'),
+                  style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                ),
               ),
             ),
           ],
@@ -425,15 +325,12 @@ class MemberSettingsScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Leave Team?', style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
-        content: Text(
-          'You will lose access to all shared tasks and workspace assets. This action cannot be undone.',
-          style: GoogleFonts.inter(),
-        ),
+        title: Text(tr(ctx, 'leave_team_q'), style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
+        content: Text(tr(ctx, 'leave_team_msg'), style: GoogleFonts.inter()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+            child: Text(tr(ctx, 'cancel'), style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
           ),
           TextButton(
             onPressed: () {
@@ -441,13 +338,10 @@ class MemberSettingsScreen extends StatelessWidget {
               // Clear persisted team data
               context.read<TeamProvider>().clearTeam();
               context.read<TeamTaskProvider>().clearAll();
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const MainShell()),
-                (_) => false,
-              );
+              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const MainShell()), (_) => false);
             },
             child: Text(
-              'Leave',
+              tr(ctx, 'leave'),
               style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: const Color(0xFFEF4444)),
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/theme_utils.dart';
+import '../l10n/translations.dart';
 import 'member_tasks_screen.dart';
 import 'member_settings_screen.dart';
 
@@ -9,12 +10,7 @@ class MemberDashboardScreen extends StatefulWidget {
   final String department;
   final String userId;
 
-  const MemberDashboardScreen({
-    super.key,
-    required this.teamName,
-    required this.department,
-    required this.userId,
-  });
+  const MemberDashboardScreen({super.key, required this.teamName, required this.department, required this.userId});
 
   @override
   State<MemberDashboardScreen> createState() => _MemberDashboardScreenState();
@@ -29,9 +25,7 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
 
     return Scaffold(
       backgroundColor: context.adaptiveSurface,
-      body: _currentTab == 0
-          ? MemberTasksScreen(teamName: widget.teamName, userId: widget.userId)
-          : const MemberSettingsScreen(),
+      body: _currentTab == 0 ? MemberTasksScreen(teamName: widget.teamName, userId: widget.userId) : const MemberSettingsScreen(),
       bottomNavigationBar: _buildBottomNav(isDark),
     );
   }
@@ -41,22 +35,10 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
     return Container(
       decoration: BoxDecoration(
         color: bgColor,
-        boxShadow: [
-          BoxShadow(
-            color: context.subtleShadow,
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: context.subtleShadow, blurRadius: 10, offset: const Offset(0, -2))],
       ),
       padding: const EdgeInsets.only(top: 8, bottom: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _navItem(Icons.assignment_rounded, 'TASKS', 0, isDark),
-          _navItem(Icons.settings_rounded, 'SETTINGS', 1, isDark),
-        ],
-      ),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [_navItem(Icons.assignment_rounded, tr(context, 'nav_team_tasks'), 0, isDark), _navItem(Icons.settings_rounded, tr(context, 'nav_team_settings'), 1, isDark)]),
     );
   }
 
@@ -73,12 +55,7 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
           const SizedBox(height: 4),
           Text(
             label,
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: isActive ? activeColor : inactiveColor,
-              letterSpacing: 0.8,
-            ),
+            style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w700, color: isActive ? activeColor : inactiveColor, letterSpacing: 0.8),
           ),
         ],
       ),

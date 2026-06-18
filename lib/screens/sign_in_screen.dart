@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_utils.dart';
+import '../l10n/translations.dart';
 import 'sign_up_screen.dart';
 import 'forgot_password_screen.dart';
 import 'main_shell.dart';
@@ -32,16 +33,10 @@ class _SignInScreenState extends State<SignInScreen> {
     final auth = context.read<AuthProvider>();
     auth.clearError();
 
-    final success = await auth.signIn(
-      email: _emailCtrl.text,
-      password: _passCtrl.text,
-    );
+    final success = await auth.signIn(email: _emailCtrl.text, password: _passCtrl.text);
 
     if (success && mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-        (_) => false,
-      );
+      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const MainShell()), (_) => false);
     }
   }
 
@@ -62,7 +57,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 const SizedBox(height: 60),
                 // Logo
                 Container(
-                  width: 56, height: 56,
+                  width: 56,
+                  height: 56,
                   decoration: BoxDecoration(
                     gradient: AppColors.primaryGradient,
                     borderRadius: BorderRadius.circular(18),
@@ -71,11 +67,12 @@ class _SignInScreenState extends State<SignInScreen> {
                   child: const Icon(Icons.check_rounded, color: Colors.white, size: 28),
                 ),
                 const SizedBox(height: 28),
-                Text('Welcome Back',
-                    style: GoogleFonts.manrope(fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: context.textPrimary)),
+                Text(
+                  tr(context, 'welcome_back'),
+                  style: GoogleFonts.manrope(fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: context.textPrimary),
+                ),
                 const SizedBox(height: 8),
-                Text('Sign in to continue with TaskFlow',
-                    style: GoogleFonts.inter(fontSize: 15, color: context.textSecondary)),
+                Text(tr(context, 'sign_in_subtitle'), style: GoogleFonts.inter(fontSize: 15, color: context.textSecondary)),
                 const SizedBox(height: 32),
 
                 // Error banner
@@ -87,38 +84,43 @@ class _SignInScreenState extends State<SignInScreen> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.urgentRed.withValues(alpha: 0.3)),
                     ),
-                    child: Row(children: [
-                      Icon(Icons.error_outline, size: 20, color: AppColors.urgentRed),
-                      const SizedBox(width: 10),
-                      Expanded(child: Text(auth.error!,
-                          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.urgentRed))),
-                    ]),
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline, size: 20, color: AppColors.urgentRed),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            auth.error!,
+                            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.urgentRed),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
                 ],
 
                 // Email
-                _label('Email'),
+                _label(tr(context, 'email')),
                 TextFormField(
                   controller: _emailCtrl,
                   validator: AuthProvider.validateEmail,
                   keyboardType: TextInputType.emailAddress,
                   style: GoogleFonts.inter(fontSize: 15, color: context.textPrimary),
-                  decoration: _inputDec('Enter your email', Icons.email_outlined),
+                  decoration: _inputDec(tr(context, 'enter_email'), Icons.email_outlined),
                 ),
                 const SizedBox(height: 16),
 
                 // Password
-                _label('Password'),
+                _label(tr(context, 'password')),
                 TextFormField(
                   controller: _passCtrl,
                   validator: AuthProvider.validatePassword,
                   obscureText: _obscure,
                   style: GoogleFonts.inter(fontSize: 15, color: context.textPrimary),
-                  decoration: _inputDec('Enter your password', Icons.lock_outline).copyWith(
+                  decoration: _inputDec(tr(context, 'enter_password'), Icons.lock_outline).copyWith(
                     suffixIcon: IconButton(
-                      icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                          size: 20, color: context.textSecondary),
+                      icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20, color: context.textSecondary),
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
@@ -129,18 +131,19 @@ class _SignInScreenState extends State<SignInScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
+                    child: Text(
+                      tr(context, 'forgot_password'),
+                      style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary),
                     ),
-                    child: Text('Forgot Password?',
-                        style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary)),
                   ),
                 ),
                 const SizedBox(height: 28),
 
                 // Sign In button
                 SizedBox(
-                  width: double.infinity, height: 56,
+                  width: double.infinity,
+                  height: 56,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: AppColors.primaryGradient,
@@ -155,37 +158,44 @@ class _SignInScreenState extends State<SignInScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9999)),
                       ),
                       child: auth.isLoading
-                          ? const SizedBox(width: 24, height: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
-                          : Text('Sign In',
-                              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                          : Text(
+                              tr(context, 'sign_in'),
+                              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                            ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 32),
 
                 // Divider
-                Row(children: [
-                  Expanded(child: Divider(color: AppColors.outlineVariant.withValues(alpha: 0.5))),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('or', style: GoogleFonts.inter(fontSize: 13, color: context.textSecondary)),
-                  ),
-                  Expanded(child: Divider(color: AppColors.outlineVariant.withValues(alpha: 0.5))),
-                ]),
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: AppColors.outlineVariant.withValues(alpha: 0.5))),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(tr(context, 'or'), style: GoogleFonts.inter(fontSize: 13, color: context.textSecondary)),
+                    ),
+                    Expanded(child: Divider(color: AppColors.outlineVariant.withValues(alpha: 0.5))),
+                  ],
+                ),
                 const SizedBox(height: 24),
 
                 // Sign up link
                 Center(
                   child: GestureDetector(
-                    onTap: () => Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const SignUpScreen()),
-                    ),
+                    onTap: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const SignUpScreen())),
                     child: RichText(
-                      text: TextSpan(style: GoogleFonts.inter(fontSize: 14, color: context.textSecondary), children: [
-                        const TextSpan(text: "Don't have an account? "),
-                        TextSpan(text: 'Sign Up', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                      ]),
+                      text: TextSpan(
+                        style: GoogleFonts.inter(fontSize: 14, color: context.textSecondary),
+                        children: [
+                          TextSpan(text: tr(context, 'no_account')),
+                          TextSpan(
+                            text: tr(context, 'sign_up'),
+                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -199,22 +209,29 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Widget _label(String t) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Text(t, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: context.textPrimary)),
-      );
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      t,
+      style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: context.textPrimary),
+    ),
+  );
 
   InputDecoration _inputDec(String hint, IconData icon) => InputDecoration(
-        hintText: hint,
-        hintStyle: GoogleFonts.inter(fontSize: 15, color: context.textHint),
-        prefixIcon: Icon(icon, size: 20, color: context.textSecondary.withValues(alpha: 0.6)),
-        filled: true,
-        fillColor: context.inputFillStrong,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: AppColors.urgentRed.withValues(alpha: 0.5))),
-        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: AppColors.urgentRed.withValues(alpha: 0.5))),
-        errorStyle: GoogleFonts.inter(fontSize: 11, color: AppColors.urgentRed),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      );
+    hintText: hint,
+    hintStyle: GoogleFonts.inter(fontSize: 15, color: context.textHint),
+    prefixIcon: Icon(icon, size: 20, color: context.textSecondary.withValues(alpha: 0.6)),
+    filled: true,
+    fillColor: context.inputFillStrong,
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(color: AppColors.urgentRed.withValues(alpha: 0.5)),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(color: AppColors.urgentRed.withValues(alpha: 0.5)),
+    ),
+    errorStyle: GoogleFonts.inter(fontSize: 11, color: AppColors.urgentRed),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+  );
 }

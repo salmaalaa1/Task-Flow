@@ -15,9 +15,7 @@ class TeamTaskProvider extends ChangeNotifier {
   // --- Load persisted data ---
   void _loadFromHive() {
     final box = Hive.box(_boxName);
-    _tasks = box.values
-        .map((raw) => TeamTask.fromMap(Map<dynamic, dynamic>.from(raw as Map)))
-        .toList();
+    _tasks = box.values.map((raw) => TeamTask.fromMap(Map<dynamic, dynamic>.from(raw as Map))).toList();
     _tasks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     notifyListeners();
   }
@@ -32,35 +30,36 @@ class TeamTaskProvider extends ChangeNotifier {
 
   // --- Getters (ALL tasks) ---
   List<TeamTask> get allTasks => List.unmodifiable(_tasks);
-  List<TeamTask> get pendingTasks =>
-      _tasks.where((t) => !t.isDone).toList();
-  List<TeamTask> get completedTasks =>
-      _tasks.where((t) => t.isDone).toList();
+  List<TeamTask> get pendingTasks => _tasks.where((t) => !t.isDone).toList();
+  List<TeamTask> get completedTasks => _tasks.where((t) => t.isDone).toList();
 
   int get totalCount => _tasks.length;
   int get completedCount => completedTasks.length;
   int get pendingCount => pendingTasks.length;
 
-  double get completionRate =>
-      _tasks.isEmpty ? 0 : completedCount / totalCount;
+  double get completionRate => _tasks.isEmpty ? 0 : completedCount / totalCount;
 
   // --- Getters (filtered by assignee) ---
-  List<TeamTask> tasksFor(String memberName) =>
-      _tasks.where((t) => t.assignedTo == memberName).toList();
+  List<TeamTask> tasksFor(String memberName) => _tasks.where((t) => t.assignedTo == memberName).toList();
 
-  List<TeamTask> pendingTasksFor(String memberName) =>
-      _tasks.where((t) => t.assignedTo == memberName && !t.isDone).toList();
+  List<TeamTask> pendingTasksFor(String memberName) => _tasks.where((t) => t.assignedTo == memberName && !t.isDone).toList();
 
-  List<TeamTask> completedTasksFor(String memberName) =>
-      _tasks.where((t) => t.assignedTo == memberName && t.isDone).toList();
+  List<TeamTask> completedTasksFor(String memberName) => _tasks.where((t) => t.assignedTo == memberName && t.isDone).toList();
+
+  List<TeamTask> tasksForUser(String userId, {String? fallbackName}) {
+    final normalizedUserId = userId.trim();
+    final normalizedName = fallbackName?.trim();
+    return _tasks.where((task) {
+      if (task.assignedToUserId.isNotEmpty) {
+        return task.assignedToUserId == normalizedUserId;
+      }
+      return normalizedName != null && normalizedName.isNotEmpty && task.assignedTo == normalizedName;
+    }).toList();
+  }
 
   /// Get unique list of assignee names from existing tasks
   List<String> get assigneeNames {
-    final names = _tasks
-        .map((t) => t.assignedTo)
-        .where((n) => n.isNotEmpty)
-        .toSet()
-        .toList();
+    final names = _tasks.map((t) => t.assignedTo).where((n) => n.isNotEmpty).toSet().toList();
     names.sort();
     return names;
   }
@@ -89,11 +88,33 @@ class TeamTaskProvider extends ChangeNotifier {
     _persist();
   }
 
+  bool toggleStatusForUser(String id, String userId, {String? fallbackName}) {
+    final task = _taskForUser(id, userId, fallbackName: fallbackName);
+    if (task == null) return false;
+    if (task.isDone) {
+      task.status = 'pending';
+    } else {
+      task.status = 'done';
+    }
+    notifyListeners();
+    _persist();
+    return true;
+  }
+
   void updateNote(String id, String note) {
     final task = _tasks.firstWhere((t) => t.id == id);
     task.note = note;
     notifyListeners();
     _persist();
+  }
+
+  bool updateNoteForUser(String id, String userId, String note, {String? fallbackName}) {
+    final task = _taskForUser(id, userId, fallbackName: fallbackName);
+    if (task == null) return false;
+    task.note = note;
+    notifyListeners();
+    _persist();
+    return true;
   }
 
   void setStatus(String id, String status) {
@@ -109,5 +130,21 @@ class TeamTaskProvider extends ChangeNotifier {
     notifyListeners();
     final box = Hive.box(_boxName);
     await box.clear();
+  }
+
+  TeamTask? _taskForUser(String id, String userId, {String? fallbackName}) {
+    final normalizedUserId = userId.trim();
+    final normalizedName = fallbackName?.trim();
+    for (final task in _tasks) {
+      if (task.id != id) continue;
+      if (task.assignedToUserId.isNotEmpty) {
+        return task.assignedToUserId == normalizedUserId ? task : null;
+      }
+      if (normalizedName != null && normalizedName.isNotEmpty && task.assignedTo == normalizedName) {
+        return task;
+      }
+      return null;
+    }
+    return null;
   }
 }

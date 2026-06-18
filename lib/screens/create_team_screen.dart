@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/team_provider.dart';
-import '../theme/app_colors.dart';
+import '../l10n/translations.dart';
 import '../theme/theme_utils.dart';
 import 'owner_dashboard_screen.dart';
 
@@ -55,25 +56,15 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
             // Owner Panel badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.blue.withValues(alpha: 0.15)
-                    : const Color(0xFFE0EDFF),
-                borderRadius: BorderRadius.circular(20),
-              ),
+              decoration: BoxDecoration(color: isDark ? Colors.blue.withValues(alpha: 0.15) : const Color(0xFFE0EDFF), borderRadius: BorderRadius.circular(20)),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.admin_panel_settings_outlined, size: 16, color: Colors.blue.shade700),
                   const SizedBox(width: 6),
                   Text(
-                    'OWNER PANEL',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.blue.shade700,
-                      letterSpacing: 1.0,
-                    ),
+                    tr(context, 'owner_panel'),
+                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.blue.shade700, letterSpacing: 1.0),
                   ),
                 ],
               ),
@@ -82,23 +73,13 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
 
             // Title
             Text(
-              'Create a Team',
-              style: GoogleFonts.manrope(
-                fontSize: 30,
-                fontWeight: FontWeight.w800,
-                color: textPrimary,
-                letterSpacing: -0.5,
-              ),
+              tr(context, 'create_team'),
+              style: GoogleFonts.manrope(fontSize: 30, fontWeight: FontWeight.w800, color: textPrimary, letterSpacing: -0.5),
             ),
             const SizedBox(height: 8),
             Text(
-              'Establish your Team and invite your collaborators to the Ethereal Atelier.',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: textSecondary,
-                height: 1.5,
-              ),
+              tr(context, 'create_team_subtitle'),
+              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400, color: textSecondary, height: 1.5),
             ),
             const SizedBox(height: 28),
 
@@ -108,40 +89,24 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
               decoration: BoxDecoration(
                 color: cardColor,
                 borderRadius: BorderRadius.circular(22),
-                boxShadow: isDark
-                    ? []
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 14,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 14, offset: const Offset(0, 4))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Team Name
                   Text(
-                    'TEAM NAME',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: labelColor,
-                      letterSpacing: 1.2,
-                    ),
+                    tr(context, 'team_name_label'),
+                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: labelColor, letterSpacing: 1.2),
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration: BoxDecoration(
-                      color: fieldColor,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                    decoration: BoxDecoration(color: fieldColor, borderRadius: BorderRadius.circular(14)),
                     child: TextField(
                       controller: _teamNameCtrl,
                       style: GoogleFonts.inter(fontSize: 15, color: textPrimary),
                       decoration: InputDecoration(
-                        hintText: 'e.g. Creative Ops',
+                        hintText: tr(context, 'team_name_example'),
                         hintStyle: GoogleFonts.inter(fontSize: 15, color: labelColor),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
@@ -152,26 +117,18 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
 
                   // Description
                   Text(
-                    'DESCRIPTION',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: labelColor,
-                      letterSpacing: 1.2,
-                    ),
+                    tr(context, 'team_description_label'),
+                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: labelColor, letterSpacing: 1.2),
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration: BoxDecoration(
-                      color: fieldColor,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                    decoration: BoxDecoration(color: fieldColor, borderRadius: BorderRadius.circular(14)),
                     child: TextField(
                       controller: _descriptionCtrl,
                       maxLines: 4,
                       style: GoogleFonts.inter(fontSize: 15, color: textPrimary),
                       decoration: InputDecoration(
-                        hintText: 'Describe the purpose of this Team...',
+                        hintText: tr(context, 'enter_team_desc'),
                         hintStyle: GoogleFonts.inter(fontSize: 15, color: labelColor, height: 1.4),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
@@ -189,15 +146,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
               decoration: BoxDecoration(
                 color: cardColor,
                 borderRadius: BorderRadius.circular(22),
-                boxShadow: isDark
-                    ? []
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 14,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 14, offset: const Offset(0, 4))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,12 +157,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                       Container(
                         width: 40,
                         height: 40,
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.blue.withValues(alpha: 0.15)
-                              : const Color(0xFFE0EDFF),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        decoration: BoxDecoration(color: isDark ? Colors.blue.withValues(alpha: 0.15) : const Color(0xFFE0EDFF), borderRadius: BorderRadius.circular(12)),
                         child: Icon(Icons.lock_outline, size: 20, color: Colors.blue.shade700),
                       ),
                       const SizedBox(width: 14),
@@ -221,22 +165,13 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Access Security',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: textPrimary,
-                            ),
+                            tr(context, 'access_security'),
+                            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: textPrimary),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'ACCESS CONTROL',
-                            style: GoogleFonts.inter(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: labelColor,
-                              letterSpacing: 1.0,
-                            ),
+                            tr(context, 'access_control'),
+                            style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: labelColor, letterSpacing: 1.0),
                           ),
                         ],
                       ),
@@ -246,20 +181,12 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
 
                   // Password label
                   Text(
-                    'UNIFIED TEAM PASSWORD',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: labelColor,
-                      letterSpacing: 1.2,
-                    ),
+                    tr(context, 'unified_team_password'),
+                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: labelColor, letterSpacing: 1.2),
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    decoration: BoxDecoration(
-                      color: fieldColor,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                    decoration: BoxDecoration(color: fieldColor, borderRadius: BorderRadius.circular(14)),
                     child: TextField(
                       controller: _passwordCtrl,
                       obscureText: _obscurePassword,
@@ -270,11 +197,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
                         suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                            size: 20,
-                            color: labelColor,
-                          ),
+                          icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined, size: 20, color: labelColor),
                           onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                         ),
                       ),
@@ -287,12 +210,8 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          'This password is required for others to join',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.blue.shade600,
-                          ),
+                          tr(context, 'password_required_to_join'),
+                          style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.blue.shade600),
                         ),
                       ),
                     ],
@@ -308,19 +227,9 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
               height: 56,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF3B82F6), Color(0xFF60A5FA)],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
+                  gradient: const LinearGradient(colors: [Color(0xFF3B82F6), Color(0xFF60A5FA)], begin: Alignment.centerLeft, end: Alignment.centerRight),
                   borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
+                  boxShadow: [BoxShadow(color: const Color(0xFF3B82F6).withValues(alpha: 0.3), blurRadius: 16, offset: const Offset(0, 6))],
                 ),
                 child: ElevatedButton(
                   onPressed: () {
@@ -331,7 +240,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                     if (teamName.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Please enter team name', style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+                          content: Text(tr(context, 'please_enter_team_name'), style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
                           backgroundColor: Colors.orange,
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -342,7 +251,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                     if (description.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Please enter a description', style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+                          content: Text(tr(context, 'please_enter_description'), style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
                           backgroundColor: Colors.orange,
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -353,7 +262,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                     if (password.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Please enter a password', style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+                          content: Text(tr(context, 'please_enter_password'), style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
                           backgroundColor: Colors.orange,
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -363,20 +272,11 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                     }
 
                     // Save team data persistently
+                    final auth = context.read<AuthProvider>();
                     final teamProvider = context.read<TeamProvider>();
-                    teamProvider.createTeam(
-                      teamName: teamName,
-                      description: description,
-                      password: password,
-                    );
+                    teamProvider.createTeam(teamName: teamName, description: description, password: password, ownerUserId: auth.currentUser?.id, ownerName: auth.currentUser?.name);
 
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (_) => OwnerDashboardScreen(
-                        teamName: teamName,
-                      )),
-                      (_) => false,
-                    );
+                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => OwnerDashboardScreen(teamName: teamName)), (_) => false);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
@@ -384,12 +284,8 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                   ),
                   child: Text(
-                    'Create a Team',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
+                    tr(context, 'create_team'),
+                    style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
                   ),
                 ),
               ),
@@ -408,12 +304,8 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                   backgroundColor: cardColor,
                 ),
                 child: Text(
-                  'Cancel',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.blue,
-                  ),
+                  tr(context, 'cancel'),
+                  style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.blue),
                 ),
               ),
             ),

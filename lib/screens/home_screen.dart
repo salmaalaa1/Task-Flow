@@ -19,7 +19,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   String _greeting(BuildContext context) {
     final hour = DateTime.now().hour;
     if (hour < 12) return tr(context, 'good_morning');
@@ -48,24 +47,37 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 children: [
                   Container(
-                    width: 40, height: 40,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(shape: BoxShape.circle, gradient: AppColors.primaryGradient),
                     child: Center(
-                      child: Text(firstName[0].toUpperCase(),
-                          style: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+                      child: Text(
+                        firstName[0].toUpperCase(),
+                        style: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
                     ),
                   ),
                   const Spacer(),
                   const SizedBox(width: 12),
                   Container(
-                    width: 40, height: 40,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(color: context.cardColorStrong, borderRadius: BorderRadius.circular(12)),
-                    child: Stack(children: [
-                      Center(child: Icon(Icons.notifications_outlined, size: 22, color: context.textSecondary)),
-                      if (taskProvider.urgentTasks.isNotEmpty)
-                        Positioned(top: 8, right: 8,
-                          child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.urgentRed, shape: BoxShape.circle))),
-                    ]),
+                    child: Stack(
+                      children: [
+                        Center(child: Icon(Icons.notifications_outlined, size: 22, color: context.textSecondary)),
+                        if (taskProvider.urgentTasks.isNotEmpty)
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(color: AppColors.urgentRed, shape: BoxShape.circle),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -74,66 +86,99 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 24),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('${_greeting(context)}, $firstName',
-                  style: GoogleFonts.manrope(fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: context.textPrimary)),
-              const SizedBox(height: 4),
-              RichText(
-                text: TextSpan(
-                  style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500, color: context.textSecondary),
-                  children: [
-                    TextSpan(text: tr(context, 'pending_prefix')),
-                    TextSpan(
-                      text: '${taskProvider.pendingCount}${taskProvider.pendingCount != 1 ? tr(context, 'pending_suffix_many') : tr(context, 'pending_suffix_one')}',
-                      style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary),
-                    ),
-                    TextSpan(text: tr(context, 'pending_end')),
-                  ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${_greeting(context)}, $firstName',
+                  style: GoogleFonts.manrope(fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: context.textPrimary),
                 ),
-              ),
-            ]),
+                const SizedBox(height: 4),
+                RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500, color: context.textSecondary),
+                    children: [
+                      TextSpan(text: tr(context, 'pending_prefix')),
+                      TextSpan(
+                        text: '${taskProvider.pendingCount}${taskProvider.pendingCount != 1 ? tr(context, 'pending_suffix_many') : tr(context, 'pending_suffix_one')}',
+                        style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary),
+                      ),
+                      TextSpan(text: tr(context, 'pending_end')),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 28),
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 24), child: PerformanceChart(weeklyData: taskProvider.weeklyCompletion)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: PerformanceChart(weeklyData: taskProvider.weeklyCompletion),
+          ),
           const SizedBox(height: 32),
           Padding(
             padding: const EdgeInsets.only(left: 24),
-            child: Text(tr(context, 'categories'), style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700, color: context.textPrimary)),
+            child: Text(
+              tr(context, 'categories'),
+              style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700, color: context.textPrimary),
+            ),
           ),
           const SizedBox(height: 16),
           SizedBox(
             height: 110,
-            child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 24), children: [
-              CategoryChip(icon: Icons.work, label: tr(context, 'work'), iconColor: AppColors.categoryWork, backgroundColor: AppColors.categoryWorkBg, count: taskProvider.taskCountForCategory(TaskCategory.work)),
-              const SizedBox(width: 16),
-              CategoryChip(icon: Icons.favorite, label: tr(context, 'personal'), iconColor: AppColors.categoryPersonal, backgroundColor: AppColors.categoryPersonalBg, count: taskProvider.taskCountForCategory(TaskCategory.personal)),
-              const SizedBox(width: 16),
-              CategoryChip(icon: Icons.fitness_center, label: tr(context, 'health'), iconColor: AppColors.categoryHealth, backgroundColor: AppColors.categoryHealthBg, count: taskProvider.taskCountForCategory(TaskCategory.health)),
-              const SizedBox(width: 16),
-              CategoryChip(icon: Icons.school, label: tr(context, 'study'), iconColor: AppColors.categoryStudy, backgroundColor: AppColors.categoryStudyBg, count: taskProvider.taskCountForCategory(TaskCategory.study)),
-              const SizedBox(width: 16),
-              CategoryChip(icon: Icons.payments, label: tr(context, 'finance'), iconColor: AppColors.categoryFinance, backgroundColor: AppColors.categoryFinanceBg, count: taskProvider.taskCountForCategory(TaskCategory.finance)),
-            ]),
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              children: [
+                CategoryChip(icon: Icons.work, label: tr(context, 'work'), iconColor: AppColors.categoryWork, backgroundColor: AppColors.categoryWorkBg, count: taskProvider.taskCountForCategory(TaskCategory.work)),
+                const SizedBox(width: 16),
+                CategoryChip(icon: Icons.favorite, label: tr(context, 'personal'), iconColor: AppColors.categoryPersonal, backgroundColor: AppColors.categoryPersonalBg, count: taskProvider.taskCountForCategory(TaskCategory.personal)),
+                const SizedBox(width: 16),
+                CategoryChip(icon: Icons.fitness_center, label: tr(context, 'health'), iconColor: AppColors.categoryHealth, backgroundColor: AppColors.categoryHealthBg, count: taskProvider.taskCountForCategory(TaskCategory.health)),
+                const SizedBox(width: 16),
+                CategoryChip(icon: Icons.school, label: tr(context, 'study'), iconColor: AppColors.categoryStudy, backgroundColor: AppColors.categoryStudyBg, count: taskProvider.taskCountForCategory(TaskCategory.study)),
+                const SizedBox(width: 16),
+                CategoryChip(icon: Icons.payments, label: tr(context, 'finance'), iconColor: AppColors.categoryFinance, backgroundColor: AppColors.categoryFinanceBg, count: taskProvider.taskCountForCategory(TaskCategory.finance)),
+              ],
+            ),
           ),
           const SizedBox(height: 32),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(tr(context, 'priority_tasks'), style: GoogleFonts.manrope(fontSize: 24, fontWeight: FontWeight.w700, color: context.textPrimary)),
-              Text('${taskProvider.priorityTasks.take(5).length} ${tr(context, 'tasks_label')}',
-                  style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primary)),
-            ]),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  tr(context, 'priority_tasks'),
+                  style: GoogleFonts.manrope(fontSize: 24, fontWeight: FontWeight.w700, color: context.textPrimary),
+                ),
+                Text(
+                  '${taskProvider.priorityTasks.take(5).length} ${tr(context, 'tasks_label')}',
+                  style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primary),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
-              children: taskProvider.priorityTasks.take(5).map((task) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: TaskCard(title: task.title, priority: task.priority, time: task.formattedTime,
-                    metadata: task.categoryLabel, isCompleted: task.isCompleted,
-                    onToggle: () => taskProvider.toggleComplete(task.id)),
-              )).toList(),
+              children: taskProvider.priorityTasks
+                  .take(5)
+                  .map(
+                    (task) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: TaskCard(
+                        title: task.title,
+                        priority: task.priority,
+                        time: task.formattedTime,
+                        metadata: taskCategoryLabel(context, task.category),
+                        isCompleted: task.isCompleted,
+                        onToggle: () => taskProvider.toggleComplete(task.id),
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         ],

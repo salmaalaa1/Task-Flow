@@ -4,13 +4,40 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/task_model.dart';
 import '../providers/settings_provider.dart';
 
 String tr(BuildContext context, String key) {
-  final lang = context.read<SettingsProvider>().language;
+  final lang = Localizations.maybeLocaleOf(context)?.languageCode ?? context.read<SettingsProvider>().language;
   final map = _translations[key];
   if (map == null) return key;
   return map[lang] ?? map['en'] ?? key;
+}
+
+String taskPriorityLabel(BuildContext context, TaskPriority priority) {
+  switch (priority) {
+    case TaskPriority.urgent:
+      return tr(context, 'urgent');
+    case TaskPriority.medium:
+      return tr(context, 'medium');
+    case TaskPriority.low:
+      return tr(context, 'low');
+  }
+}
+
+String taskCategoryLabel(BuildContext context, TaskCategory category) {
+  switch (category) {
+    case TaskCategory.work:
+      return tr(context, 'work');
+    case TaskCategory.personal:
+      return tr(context, 'personal');
+    case TaskCategory.health:
+      return tr(context, 'health');
+    case TaskCategory.study:
+      return tr(context, 'study');
+    case TaskCategory.finance:
+      return tr(context, 'finance');
+  }
 }
 
 const Map<String, Map<String, String>> _translations = {
@@ -198,21 +225,43 @@ const Map<String, Map<String, String>> _translations = {
   'member': {'en': 'MEMBER', 'ar': 'عضو'},
 
   // ─── Team Create ──────────────────────────
+  'owner_panel': {'en': 'OWNER PANEL', 'ar': 'لوحة المالك'},
+  'create_team_subtitle': {'en': 'Establish your Team and invite your collaborators to the Ethereal Atelier.', 'ar': 'أنشئ فريقك وادعُ المتعاونين إلى مساحة العمل.'},
   'create_your_team': {'en': 'Create Your Team', 'ar': 'أنشئ فريقك'},
   'team_name': {'en': 'Team Name', 'ar': 'اسم الفريق'},
+  'team_name_label': {'en': 'TEAM NAME', 'ar': 'اسم الفريق'},
   'enter_team_name': {'en': 'Enter team name', 'ar': 'أدخل اسم الفريق'},
+  'team_name_example': {'en': 'e.g. Creative Ops', 'ar': 'مثال: فريق الإبداع'},
   'team_description': {'en': 'Description', 'ar': 'الوصف'},
+  'team_description_label': {'en': 'DESCRIPTION', 'ar': 'الوصف'},
   'enter_team_desc': {'en': 'Describe your team\'s purpose...', 'ar': 'صف هدف فريقك...'},
   'team_password': {'en': 'Team Password', 'ar': 'كلمة مرور الفريق'},
+  'team_password_label': {'en': 'TEAM PASSWORD', 'ar': 'كلمة مرور الفريق'},
+  'access_security': {'en': 'Access Security', 'ar': 'أمان الوصول'},
+  'access_control': {'en': 'ACCESS CONTROL', 'ar': 'التحكم في الوصول'},
+  'unified_team_password': {'en': 'UNIFIED TEAM PASSWORD', 'ar': 'كلمة مرور الفريق الموحدة'},
   'enter_team_password': {'en': 'Set a password for members', 'ar': 'عيّن كلمة مرور للأعضاء'},
+  'password_required_to_join': {'en': 'This password is required for others to join', 'ar': 'هذه الكلمة مطلوبة لانضمام الآخرين'},
   'create_team_btn': {'en': 'Create Team', 'ar': 'إنشاء الفريق'},
   'fill_all_fields': {'en': 'Please fill all fields', 'ar': 'يرجى ملء جميع الحقول'},
+  'please_enter_team_name': {'en': 'Please enter team name', 'ar': 'يرجى إدخال اسم الفريق'},
+  'please_enter_description': {'en': 'Please enter a description', 'ar': 'يرجى إدخال وصف'},
+  'please_enter_password': {'en': 'Please enter a password', 'ar': 'يرجى إدخال كلمة مرور'},
 
   // ─── Team Join ────────────────────────────
   'join_a_team': {'en': 'Join a Team', 'ar': 'انضم لفريق'},
+  'join_team_subtitle': {'en': 'Enter your credentials to synchronize with your team atelier.', 'ar': 'أدخل بياناتك للاتصال بفريقك.'},
+  'team_name_hint_join': {'en': 'Creative Studio X', 'ar': 'استوديو الإبداع'},
   'enter_join_password': {'en': 'Enter team password', 'ar': 'أدخل كلمة مرور الفريق'},
+  'required_verify_association': {'en': 'Required to verify association', 'ar': 'مطلوب للتحقق من الانتماء'},
   'your_user_id': {'en': 'Your User ID', 'ar': 'معرف المستخدم'},
+  'user_id_label': {'en': 'USER ID', 'ar': 'معرف المستخدم'},
+  'sign_in_required': {'en': 'Sign in required', 'ar': 'تسجيل الدخول مطلوب'},
+  'must_sign_in_join': {'en': 'You must sign in before joining a team.', 'ar': 'يجب تسجيل الدخول قبل الانضمام إلى فريق.'},
+  'please_enter_team_password': {'en': 'Please enter team password', 'ar': 'يرجى إدخال كلمة مرور الفريق'},
+  'unable_join_team': {'en': 'Unable to join team.', 'ar': 'تعذر الانضمام إلى الفريق.'},
   'department': {'en': 'Department', 'ar': 'القسم'},
+  'department_selection': {'en': 'DEPARTMENT SELECTION', 'ar': 'اختيار القسم'},
   'programming': {'en': 'Programming', 'ar': 'البرمجة'},
   'media': {'en': 'Media', 'ar': 'الإعلام'},
   'operation': {'en': 'Operation', 'ar': 'العمليات'},
@@ -237,10 +286,13 @@ const Map<String, Map<String, String>> _translations = {
   'send_task': {'en': 'Send Task', 'ar': 'إرسال المهمة'},
   'task_sent': {'en': 'Task Sent!', 'ar': 'تم إرسال المهمة!'},
   'assigned_to': {'en': 'Assigned to', 'ar': 'مُعيّنة إلى'},
+  'task_visible_prefix': {'en': 'This task will be immediately visible in ', 'ar': 'ستظهر هذه المهمة فورًا في قائمة '},
+  'task_visible_suffix': {'en': '\'s active queue. Notifications are enabled for the department.', 'ar': ' النشطة. تم تفعيل الإشعارات للقسم.'},
   'unassigned': {'en': 'Unassigned', 'ar': 'غير معيّنة'},
 
   // ─── Member Tasks ─────────────────────────
   'my_tasks_team': {'en': 'My Tasks', 'ar': 'مهامي'},
+  'my_day': {'en': 'My Day', 'ar': 'يومي'},
   'remaining': {'en': 'Remaining', 'ar': 'متبقية'},
   'priority_focus': {'en': 'PRIORITY FOCUS', 'ar': 'التركيز على الأولوية'},
   'no_tasks_assigned': {'en': 'No tasks assigned', 'ar': 'لا مهام معيّنة'},
@@ -268,6 +320,7 @@ const Map<String, Map<String, String>> _translations = {
   // ─── Team Settings ────────────────────────
   'team_settings': {'en': 'Settings', 'ar': 'الإعدادات'},
   'profile': {'en': 'PROFILE', 'ar': 'الملف الشخصي'},
+  'manage_workspace': {'en': 'Manage your personal workspace and team configurations.', 'ar': 'إدارة مساحة عملك الشخصية وإعدادات الفريق.'},
   'team_info': {'en': 'TEAM INFO', 'ar': 'معلومات الفريق'},
   'role': {'en': 'Role', 'ar': 'الدور'},
   'danger_zone': {'en': 'DANGER ZONE', 'ar': 'منطقة الخطر'},
@@ -275,9 +328,36 @@ const Map<String, Map<String, String>> _translations = {
   'enter_member_name': {'en': 'Enter member name...', 'ar': 'أدخل اسم العضو...'},
   'add': {'en': 'Add', 'ar': 'إضافة'},
   'remove': {'en': 'Remove', 'ar': 'إزالة'},
+  'remove_member_q_prefix': {'en': 'Remove ', 'ar': 'إزالة '},
+  'remove_member_q_suffix': {'en': '?', 'ar': '؟'},
+  'remove_member_msg': {'en': 'This will remove the member from your team.', 'ar': 'سيؤدي ذلك إلى إزالة العضو من فريقك.'},
+  'leave': {'en': 'Leave', 'ar': 'مغادرة'},
+  'user_fallback': {'en': 'User', 'ar': 'مستخدم'},
+  'designer': {'en': 'Designer', 'ar': 'مصمم'},
 
   // ─── Team Nav ─────────────────────────────
   'nav_team': {'en': 'TEAM', 'ar': 'الفريق'},
   'nav_team_tasks': {'en': 'TASKS', 'ar': 'المهام'},
   'nav_team_settings': {'en': 'SETTINGS', 'ar': 'الإعدادات'},
+
+  // ─── Date Labels ──────────────────────────
+  'monday': {'en': 'MONDAY', 'ar': 'الإثنين'},
+  'tuesday': {'en': 'TUESDAY', 'ar': 'الثلاثاء'},
+  'wednesday': {'en': 'WEDNESDAY', 'ar': 'الأربعاء'},
+  'thursday': {'en': 'THURSDAY', 'ar': 'الخميس'},
+  'friday': {'en': 'FRIDAY', 'ar': 'الجمعة'},
+  'saturday': {'en': 'SATURDAY', 'ar': 'السبت'},
+  'sunday': {'en': 'SUNDAY', 'ar': 'الأحد'},
+  'jan_short': {'en': 'JAN', 'ar': 'ينا'},
+  'feb_short': {'en': 'FEB', 'ar': 'فبر'},
+  'mar_short': {'en': 'MAR', 'ar': 'مار'},
+  'apr_short': {'en': 'APR', 'ar': 'أبر'},
+  'may_short': {'en': 'MAY', 'ar': 'ماي'},
+  'jun_short': {'en': 'JUN', 'ar': 'يون'},
+  'jul_short': {'en': 'JUL', 'ar': 'يول'},
+  'aug_short': {'en': 'AUG', 'ar': 'أغس'},
+  'sep_short': {'en': 'SEP', 'ar': 'سبت'},
+  'oct_short': {'en': 'OCT', 'ar': 'أكت'},
+  'nov_short': {'en': 'NOV', 'ar': 'نوف'},
+  'dec_short': {'en': 'DEC', 'ar': 'ديس'},
 };

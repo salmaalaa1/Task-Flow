@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_utils.dart';
+import '../l10n/translations.dart';
 import 'sign_in_screen.dart';
 import 'main_shell.dart';
 
@@ -36,17 +37,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final auth = context.read<AuthProvider>();
     auth.clearError();
 
-    final success = await auth.signUp(
-      name: _nameCtrl.text,
-      email: _emailCtrl.text,
-      password: _passCtrl.text,
-    );
+    final success = await auth.signUp(name: _nameCtrl.text, email: _emailCtrl.text, password: _passCtrl.text);
 
     if (success && mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-        (_) => false,
-      );
+      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const MainShell()), (_) => false);
     }
   }
 
@@ -69,21 +63,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 GestureDetector(
                   onTap: () => Navigator.of(context).pop(),
                   child: Container(
-                    width: 40, height: 40,
-                    decoration: BoxDecoration(
-                      color: context.cardColorStrong,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(color: context.cardColorStrong, borderRadius: BorderRadius.circular(12)),
                     child: Icon(Icons.arrow_back_ios_new, size: 18, color: context.textPrimary),
                   ),
                 ),
                 const SizedBox(height: 24),
-                Text('Create Account',
-                    style: GoogleFonts.manrope(
-                        fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: context.textPrimary)),
+                Text(
+                  tr(context, 'create_account'),
+                  style: GoogleFonts.manrope(fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: context.textPrimary),
+                ),
                 const SizedBox(height: 8),
-                Text('Sign up to get started with TaskFlow',
-                    style: GoogleFonts.inter(fontSize: 15, color: context.textSecondary)),
+                Text(tr(context, 'create_account_subtitle'), style: GoogleFonts.inter(fontSize: 15, color: context.textSecondary)),
                 const SizedBox(height: 32),
 
                 // Error banner
@@ -95,56 +87,66 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.urgentRed.withValues(alpha: 0.3)),
                     ),
-                    child: Row(children: [
-                      Icon(Icons.error_outline, size: 20, color: AppColors.urgentRed),
-                      const SizedBox(width: 10),
-                      Expanded(child: Text(auth.error!,
-                          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.urgentRed))),
-                    ]),
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline, size: 20, color: AppColors.urgentRed),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            auth.error!,
+                            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.urgentRed),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
                 ],
 
                 // Full Name
-                _label('Full Name'),
-                _field(_nameCtrl, 'Enter your full name', Icons.person_outline,
-                    validator: AuthProvider.validateName),
+                _label(tr(context, 'full_name')),
+                _field(_nameCtrl, tr(context, 'enter_name'), Icons.person_outline, validator: AuthProvider.validateName),
                 const SizedBox(height: 16),
 
                 // Email
-                _label('Email'),
-                _field(_emailCtrl, 'Enter your email', Icons.email_outlined,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: AuthProvider.validateEmail),
+                _label(tr(context, 'email')),
+                _field(_emailCtrl, tr(context, 'enter_email'), Icons.email_outlined, keyboardType: TextInputType.emailAddress, validator: AuthProvider.validateEmail),
                 const SizedBox(height: 16),
 
                 // Password
-                _label('Password'),
-                _field(_passCtrl, 'Min 6 characters', Icons.lock_outline,
-                    obscure: _obscurePass,
-                    validator: AuthProvider.validatePassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscurePass ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                          size: 20, color: context.textSecondary),
-                      onPressed: () => setState(() => _obscurePass = !_obscurePass),
-                    )),
+                _label(tr(context, 'password')),
+                _field(
+                  _passCtrl,
+                  tr(context, 'min_6_chars'),
+                  Icons.lock_outline,
+                  obscure: _obscurePass,
+                  validator: AuthProvider.validatePassword,
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscurePass ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20, color: context.textSecondary),
+                    onPressed: () => setState(() => _obscurePass = !_obscurePass),
+                  ),
+                ),
                 const SizedBox(height: 16),
 
                 // Confirm Password
-                _label('Confirm Password'),
-                _field(_confirmCtrl, 'Re-enter your password', Icons.lock_outline,
-                    obscure: _obscureConfirm,
-                    validator: (v) => AuthProvider.validateConfirmPassword(_passCtrl.text, v),
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscureConfirm ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                          size: 20, color: AppColors.onSurfaceVariant),
-                      onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
-                    )),
+                _label(tr(context, 'confirm_password')),
+                _field(
+                  _confirmCtrl,
+                  tr(context, 'reenter_password'),
+                  Icons.lock_outline,
+                  obscure: _obscureConfirm,
+                  validator: (v) => AuthProvider.validateConfirmPassword(_passCtrl.text, v),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscureConfirm ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20, color: AppColors.onSurfaceVariant),
+                    onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                  ),
+                ),
                 const SizedBox(height: 28),
 
                 // Sign Up button
                 SizedBox(
-                  width: double.infinity, height: 56,
+                  width: double.infinity,
+                  height: 56,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: AppColors.primaryGradient,
@@ -159,10 +161,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9999)),
                       ),
                       child: auth.isLoading
-                          ? const SizedBox(width: 24, height: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
-                          : Text('Create Account',
-                              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                          : Text(
+                              tr(context, 'create_account'),
+                              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                            ),
                     ),
                   ),
                 ),
@@ -171,14 +174,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 // Sign in link
                 Center(
                   child: GestureDetector(
-                    onTap: () => Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const SignInScreen()),
-                    ),
+                    onTap: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const SignInScreen())),
                     child: RichText(
-                      text: TextSpan(style: GoogleFonts.inter(fontSize: 14, color: context.textSecondary), children: [
-                        const TextSpan(text: 'Already have an account? '),
-                        TextSpan(text: 'Sign In', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                      ]),
+                      text: TextSpan(
+                        style: GoogleFonts.inter(fontSize: 14, color: context.textSecondary),
+                        children: [
+                          TextSpan(text: tr(context, 'have_account')),
+                          TextSpan(
+                            text: tr(context, 'sign_in'),
+                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -192,13 +199,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget _label(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Text(text, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: context.textPrimary)),
-      );
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      text,
+      style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: context.textPrimary),
+    ),
+  );
 
-  Widget _field(TextEditingController ctrl, String hint, IconData icon,
-      {bool obscure = false, TextInputType? keyboardType,
-      String? Function(String?)? validator, Widget? suffixIcon}) {
+  Widget _field(TextEditingController ctrl, String hint, IconData icon, {bool obscure = false, TextInputType? keyboardType, String? Function(String?)? validator, Widget? suffixIcon}) {
     return TextFormField(
       controller: ctrl,
       obscureText: obscure,
@@ -214,11 +222,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
         fillColor: context.inputFillStrong,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
         errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: AppColors.urgentRed.withValues(alpha: 0.5))),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: AppColors.urgentRed.withValues(alpha: 0.5)),
+        ),
         focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: AppColors.urgentRed.withValues(alpha: 0.5))),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: AppColors.urgentRed.withValues(alpha: 0.5)),
+        ),
         errorStyle: GoogleFonts.inter(fontSize: 11, color: AppColors.urgentRed),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       ),

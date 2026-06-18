@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_utils.dart';
 import '../models/task_model.dart';
+import '../l10n/translations.dart';
 
 class TaskCard extends StatelessWidget {
   final String title;
@@ -13,16 +14,7 @@ class TaskCard extends StatelessWidget {
   final VoidCallback? onToggle;
   final VoidCallback? onTap;
 
-  const TaskCard({
-    super.key,
-    required this.title,
-    required this.priority,
-    required this.time,
-    required this.metadata,
-    this.isCompleted = false,
-    this.onToggle,
-    this.onTap,
-  });
+  const TaskCard({super.key, required this.title, required this.priority, required this.time, required this.metadata, this.isCompleted = false, this.onToggle, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -31,15 +23,15 @@ class TaskCard extends StatelessWidget {
     switch (priority) {
       case TaskPriority.urgent:
         priorityColor = AppColors.urgentRed;
-        priorityLabel = 'Urgent';
+        priorityLabel = taskPriorityLabel(context, priority);
         break;
       case TaskPriority.medium:
         priorityColor = AppColors.mediumAmber;
-        priorityLabel = 'Medium';
+        priorityLabel = taskPriorityLabel(context, priority);
         break;
       case TaskPriority.low:
         priorityColor = AppColors.lowGreen;
-        priorityLabel = 'Low';
+        priorityLabel = taskPriorityLabel(context, priority);
         break;
     }
 
@@ -65,7 +57,8 @@ class TaskCard extends StatelessWidget {
                     GestureDetector(
                       onTap: onToggle,
                       child: Container(
-                        width: 24, height: 24,
+                        width: 24,
+                        height: 24,
                         margin: const EdgeInsets.only(right: 12),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
@@ -76,23 +69,29 @@ class TaskCard extends StatelessWidget {
                       ),
                     ),
                   Expanded(
-                    child: Text(title,
-                        style: GoogleFonts.inter(
-                          fontSize: 16, fontWeight: FontWeight.w700, color: context.textPrimary,
-                          decoration: isCompleted ? TextDecoration.lineThrough : null,
-                        )),
+                    child: Text(
+                      title,
+                      style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: context.textPrimary, decoration: isCompleted ? TextDecoration.lineThrough : null),
+                    ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: priorityColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
+                    decoration: BoxDecoration(color: priorityColor.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(shape: BoxShape.circle, color: priorityColor),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          priorityLabel,
+                          style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w700, color: priorityColor),
+                        ),
+                      ],
                     ),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Container(width: 6, height: 6, decoration: BoxDecoration(shape: BoxShape.circle, color: priorityColor)),
-                      const SizedBox(width: 4),
-                      Text(priorityLabel, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w700, color: priorityColor)),
-                    ]),
                   ),
                 ],
               ),
@@ -101,11 +100,17 @@ class TaskCard extends StatelessWidget {
                 children: [
                   Icon(Icons.schedule, size: 14, color: context.textSecondary.withValues(alpha: 0.6)),
                   const SizedBox(width: 4),
-                  Text(time, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: context.textSecondary.withValues(alpha: 0.6))),
+                  Text(
+                    time,
+                    style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: context.textSecondary.withValues(alpha: 0.6)),
+                  ),
                   const SizedBox(width: 16),
                   Icon(Icons.label_outline, size: 14, color: context.textSecondary.withValues(alpha: 0.6)),
                   const SizedBox(width: 4),
-                  Text(metadata, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: context.textSecondary.withValues(alpha: 0.6))),
+                  Text(
+                    metadata,
+                    style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: context.textSecondary.withValues(alpha: 0.6)),
+                  ),
                 ],
               ),
             ],

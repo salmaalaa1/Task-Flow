@@ -20,9 +20,9 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(UserModelAdapter());
   await Hive.openBox<UserModel>('users');
-  await Hive.openBox('tasks');   // generic box for task maps
-  await Hive.openBox('events');  // generic box for event maps
-  await Hive.openBox('team');    // generic box for team data
+  await Hive.openBox('tasks'); // generic box for task maps
+  await Hive.openBox('events'); // generic box for event maps
+  await Hive.openBox('team'); // generic box for team data
   await Hive.openBox('team_tasks'); // generic box for team tasks
 
   // Load settings eagerly
@@ -48,26 +48,28 @@ class TaskFlowApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: settings),
       ],
       child: Consumer<SettingsProvider>(
-        builder: (_, sp, __) {
-          final locale = Locale(sp.language);
+        builder: (context, sp, child) {
           return MaterialApp(
             title: 'TaskFlow',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: sp.themeMode,
-            locale: locale,
+            locale: sp.locale,
             supportedLocales: const [Locale('en'), Locale('ar')],
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
+            localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
+            localeResolutionCallback: (locale, supportedLocales) {
+              if (locale == null) return sp.locale;
+              for (final supportedLocale in supportedLocales) {
+                if (supportedLocale.languageCode == locale.languageCode) {
+                  return supportedLocale;
+                }
+              }
+              return sp.locale;
+            },
             builder: (context, child) {
-              return Directionality(
-                textDirection: sp.isArabic ? TextDirection.rtl : TextDirection.ltr,
-                child: child!,
-              );
+              final locale = Localizations.localeOf(context);
+              return Directionality(textDirection: locale.languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr, child: child!);
             },
             home: const SplashScreen(),
           );

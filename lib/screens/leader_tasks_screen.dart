@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/team_task_provider.dart';
 import '../models/team_task_model.dart';
 import '../theme/theme_utils.dart';
+import '../l10n/translations.dart';
 
 class LeaderTasksScreen extends StatelessWidget {
   final String teamName;
@@ -19,13 +21,14 @@ class LeaderTasksScreen extends StatelessWidget {
     final cardColor = context.cardColor;
 
     final tp = context.watch<TeamTaskProvider>();
-    // Filter tasks to show only those assigned to this leader
-    final myTasks = tp.tasksFor(userId);
+    final currentUserName = context.watch<AuthProvider>().currentUser?.name;
+    // Filter tasks to show only those assigned to this authenticated leader.
+    final myTasks = tp.tasksForUser(userId, fallbackName: currentUserName);
     final pending = myTasks.where((t) => !t.isDone).toList();
     final completed = myTasks.where((t) => t.isDone).toList();
     final now = DateTime.now();
-    final dayNames = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
-    final monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    final dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    final monthKeys = ['jan_short', 'feb_short', 'mar_short', 'apr_short', 'may_short', 'jun_short', 'jul_short', 'aug_short', 'sep_short', 'oct_short', 'nov_short', 'dec_short'];
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -41,17 +44,10 @@ class LeaderTasksScreen extends StatelessWidget {
                   height: 44,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF2C3E50), Color(0xFF1A252F)],
-                    ),
-                    border: Border.all(
-                      color: isDark ? Colors.white24 : const Color(0xFFE0E0E0),
-                      width: 2,
-                    ),
+                    gradient: const LinearGradient(colors: [Color(0xFF2C3E50), Color(0xFF1A252F)]),
+                    border: Border.all(color: isDark ? Colors.white24 : const Color(0xFFE0E0E0), width: 2),
                   ),
-                  child: const Center(
-                    child: Icon(Icons.person, size: 22, color: Color(0xFF7FB3D0)),
-                  ),
+                  child: const Center(child: Icon(Icons.person, size: 22, color: Color(0xFF7FB3D0))),
                 ),
                 const SizedBox(width: 12),
                 Column(
@@ -59,11 +55,7 @@ class LeaderTasksScreen extends StatelessWidget {
                   children: [
                     Text(
                       teamName,
-                      style: GoogleFonts.manrope(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: textPrimary,
-                      ),
+                      style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.w800, color: textPrimary),
                     ),
                     const SizedBox(height: 2),
                     Row(
@@ -71,13 +63,8 @@ class LeaderTasksScreen extends StatelessWidget {
                         const Icon(Icons.star, size: 13, color: Color(0xFF1A1A2E)),
                         const SizedBox(width: 4),
                         Text(
-                          'LEADER',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF1A1A2E),
-                            letterSpacing: 1.0,
-                          ),
+                          tr(context, 'leader').toUpperCase(),
+                          style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800, color: const Color(0xFF1A1A2E), letterSpacing: 1.0),
                         ),
                       ],
                     ),
@@ -96,23 +83,13 @@ class LeaderTasksScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'My Tasks',
-                        style: GoogleFonts.manrope(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w800,
-                          color: textPrimary,
-                          letterSpacing: -0.5,
-                        ),
+                        tr(context, 'my_tasks_team'),
+                        style: GoogleFonts.manrope(fontSize: 32, fontWeight: FontWeight.w800, color: textPrimary, letterSpacing: -0.5),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '${pending.length} pending · ${completed.length} done',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: textSecondary,
-                          height: 1.4,
-                        ),
+                        '${pending.length} ${tr(context, 'pending_label').toLowerCase()} · ${completed.length} ${tr(context, 'done').toLowerCase()}',
+                        style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400, color: textSecondary, height: 1.4),
                       ),
                     ],
                   ),
@@ -120,30 +97,16 @@ class LeaderTasksScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.08)
-                        : const Color(0xFFF0F2F5),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                  decoration: BoxDecoration(color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFF0F2F5), borderRadius: BorderRadius.circular(14)),
                   child: Column(
                     children: [
                       Text(
-                        '${dayNames[now.weekday - 1]}, ${monthNames[now.month - 1]}',
-                        style: GoogleFonts.inter(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: labelColor,
-                          letterSpacing: 0.8,
-                        ),
+                        '${tr(context, dayKeys[now.weekday - 1])}, ${tr(context, monthKeys[now.month - 1])}',
+                        style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w700, color: labelColor, letterSpacing: 0.8),
                       ),
                       Text(
                         '${now.day}',
-                        style: GoogleFonts.manrope(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: textPrimary,
-                        ),
+                        style: GoogleFonts.manrope(fontSize: 22, fontWeight: FontWeight.w800, color: textPrimary),
                       ),
                     ],
                   ),
@@ -157,40 +120,40 @@ class LeaderTasksScreen extends StatelessWidget {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(40),
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(22),
-                ),
+                decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(22)),
                 child: Column(
                   children: [
                     Icon(Icons.assignment_outlined, size: 56, color: labelColor),
                     const SizedBox(height: 16),
-                    Text('No tasks assigned', style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700, color: textSecondary)),
+                    Text(
+                      tr(context, 'no_tasks_assigned'),
+                      style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700, color: textSecondary),
+                    ),
                     const SizedBox(height: 6),
-                    Text('Your team owner will assign tasks to you', style: GoogleFonts.inter(fontSize: 13, color: labelColor)),
+                    Text(tr(context, 'owner_will_assign'), style: GoogleFonts.inter(fontSize: 13, color: labelColor)),
                   ],
                 ),
               )
             else ...[
               // Pending tasks
               if (pending.isNotEmpty) ...[
-                Text('PENDING', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800, color: labelColor, letterSpacing: 1.0)),
+                Text(
+                  tr(context, 'pending_label'),
+                  style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800, color: labelColor, letterSpacing: 1.0),
+                ),
                 const SizedBox(height: 10),
-                ...pending.map((task) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _taskCard(context, task, cardColor, isDark, textPrimary, textSecondary, labelColor, tp),
-                    )),
+                ...pending.map((task) => Padding(padding: const EdgeInsets.only(bottom: 12), child: _taskCard(context, task, cardColor, isDark, textPrimary, textSecondary, labelColor, tp, currentUserName))),
                 const SizedBox(height: 20),
               ],
 
               // Completed tasks
               if (completed.isNotEmpty) ...[
-                Text('COMPLETED', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800, color: const Color(0xFF22C55E), letterSpacing: 1.0)),
+                Text(
+                  tr(context, 'completed_label'),
+                  style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800, color: const Color(0xFF22C55E), letterSpacing: 1.0),
+                ),
                 const SizedBox(height: 10),
-                ...completed.map((task) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _taskCard(context, task, cardColor, isDark, textPrimary, textSecondary, labelColor, tp),
-                    )),
+                ...completed.map((task) => Padding(padding: const EdgeInsets.only(bottom: 12), child: _taskCard(context, task, cardColor, isDark, textPrimary, textSecondary, labelColor, tp, currentUserName))),
               ],
             ],
           ],
@@ -199,28 +162,29 @@ class LeaderTasksScreen extends StatelessWidget {
     );
   }
 
-  Widget _taskCard(BuildContext context, TeamTask task, Color cardColor, bool isDark,
-      Color textPrimary, Color textSecondary, Color labelColor, TeamTaskProvider tp) {
+  Widget _taskCard(BuildContext context, TeamTask task, Color cardColor, bool isDark, Color textPrimary, Color textSecondary, Color labelColor, TeamTaskProvider tp, String? currentUserName) {
     final statusColor = task.isDone
         ? const Color(0xFF22C55E)
         : task.isInProgress
-            ? const Color(0xFF3B82F6)
-            : const Color(0xFFF59E0B);
-    final statusLabel = task.isDone ? 'DONE' : task.isInProgress ? 'IN PROGRESS' : 'PENDING';
+        ? const Color(0xFF3B82F6)
+        : const Color(0xFFF59E0B);
+    final statusLabel = task.isDone
+        ? tr(context, 'done_label')
+        : task.isInProgress
+        ? tr(context, 'in_progress')
+        : tr(context, 'pending_label');
     final statusBg = task.isDone
         ? const Color(0xFFF0FDF4)
         : task.isInProgress
-            ? const Color(0xFFEBF0FF)
-            : const Color(0xFFFFF7ED);
+        ? const Color(0xFFEBF0FF)
+        : const Color(0xFFFFF7ED);
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(22),
-        boxShadow: isDark ? [] : [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 16, offset: const Offset(0, 4)),
-        ],
+        boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 16, offset: const Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,15 +192,13 @@ class LeaderTasksScreen extends StatelessWidget {
           // Status badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: isDark ? statusColor.withValues(alpha: 0.15) : statusBg,
-              borderRadius: BorderRadius.circular(20),
-            ),
+            decoration: BoxDecoration(color: isDark ? statusColor.withValues(alpha: 0.15) : statusBg, borderRadius: BorderRadius.circular(20)),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 7, height: 7,
+                  width: 7,
+                  height: 7,
                   decoration: BoxDecoration(shape: BoxShape.circle, color: statusColor),
                 ),
                 const SizedBox(width: 6),
@@ -250,12 +212,7 @@ class LeaderTasksScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             task.title,
-            style: GoogleFonts.manrope(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: textPrimary,
-              decoration: task.isDone ? TextDecoration.lineThrough : null,
-            ),
+            style: GoogleFonts.manrope(fontSize: 22, fontWeight: FontWeight.w800, color: textPrimary, decoration: task.isDone ? TextDecoration.lineThrough : null),
           ),
           if (task.note.isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -271,7 +228,7 @@ class LeaderTasksScreen extends StatelessWidget {
             children: [
               // Toggle done button
               ElevatedButton(
-                onPressed: () => tp.toggleStatus(task.id),
+                onPressed: () => tp.toggleStatusForUser(task.id, userId, fallbackName: currentUserName),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: task.isDone ? const Color(0xFF22C55E) : const Color(0xFF1A1A2E),
                   padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
@@ -281,13 +238,10 @@ class LeaderTasksScreen extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      task.isDone ? Icons.undo : Icons.check,
-                      size: 16, color: Colors.white,
-                    ),
+                    Icon(task.isDone ? Icons.undo : Icons.check, size: 16, color: Colors.white),
                     const SizedBox(width: 8),
                     Text(
-                      task.isDone ? 'Undo' : 'Mark Done',
+                      task.isDone ? tr(context, 'undo') : tr(context, 'mark_done'),
                       style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),
                     ),
                   ],
@@ -296,7 +250,7 @@ class LeaderTasksScreen extends StatelessWidget {
               const Spacer(),
               // Add note button
               GestureDetector(
-                onTap: () => _showNoteDialog(context, task, tp),
+                onTap: () => _showNoteDialog(context, task, tp, currentUserName),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
@@ -309,7 +263,10 @@ class LeaderTasksScreen extends StatelessWidget {
                     children: [
                       const Icon(Icons.edit_note, size: 16, color: Color(0xFF3B82F6)),
                       const SizedBox(width: 4),
-                      Text('Note', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF3B82F6))),
+                      Text(
+                        tr(context, 'note'),
+                        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFF3B82F6)),
+                      ),
                     ],
                   ),
                 ),
@@ -321,30 +278,33 @@ class LeaderTasksScreen extends StatelessWidget {
     );
   }
 
-  void _showNoteDialog(BuildContext context, TeamTask task, TeamTaskProvider tp) {
+  void _showNoteDialog(BuildContext context, TeamTask task, TeamTaskProvider tp, String? currentUserName) {
     final noteCtrl = TextEditingController(text: task.note);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Add Note', style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
+        title: Text(tr(ctx, 'add_note'), style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
         content: TextField(
           controller: noteCtrl,
           maxLines: 3,
           style: GoogleFonts.inter(fontSize: 14),
-          decoration: InputDecoration(
-            hintText: 'Write your note...',
-            hintStyle: GoogleFonts.inter(fontSize: 14),
-          ),
+          decoration: InputDecoration(hintText: tr(ctx, 'write_note'), hintStyle: GoogleFonts.inter(fontSize: 14)),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Cancel', style: GoogleFonts.inter(fontWeight: FontWeight.w500))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(tr(ctx, 'cancel'), style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+          ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              tp.updateNote(task.id, noteCtrl.text.trim());
+              tp.updateNoteForUser(task.id, userId, noteCtrl.text.trim(), fallbackName: currentUserName);
             },
-            child: Text('Save', style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: const Color(0xFF3B82F6))),
+            child: Text(
+              tr(ctx, 'save'),
+              style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: const Color(0xFF3B82F6)),
+            ),
           ),
         ],
       ),

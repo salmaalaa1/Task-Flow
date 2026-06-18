@@ -28,203 +28,260 @@ class SettingsScreen extends StatelessWidget {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 120),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-            child: Text(tr(context, 'settings'),
-                style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-          ),
-        ),
-        const SizedBox(height: 28),
-        // Profile
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: GestureDetector(
-            onTap: () => _editProfile(context, auth),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(24), border: Border.all(color: borderColor)),
-              child: Row(children: [
-                Container(width: 56, height: 56,
-                    decoration: BoxDecoration(shape: BoxShape.circle, gradient: AppColors.primaryGradient),
-                    child: Center(child: Text(user != null ? user.name[0].toUpperCase() : 'U',
-                        style: GoogleFonts.manrope(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)))),
-                const SizedBox(width: 16),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(user?.name ?? 'User', style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 4),
-                  Text(user?.email ?? '', style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w400, color: AppColors.onSurfaceVariant)),
-                ])),
-                Icon(Icons.edit_outlined, size: 20, color: AppColors.primary),
-              ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+              child: Text(tr(context, 'settings'), style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
             ),
           ),
-        ),
-        const SizedBox(height: 24),
-        _sectionTitle(context, tr(context, 'preferences')),
-        const SizedBox(height: 12),
-        _toggleItem(Icons.dark_mode_outlined, tr(context, 'dark_mode'), sp.isDarkMode, (v) => sp.toggleDarkMode(v), cardColor, borderColor),
-        const SizedBox(height: 8),
-        _toggleItem(Icons.notifications_outlined, tr(context, 'push_notifications'), sp.notifications, (v) => sp.toggleNotifications(v), cardColor, borderColor),
-        const SizedBox(height: 8),
-        _toggleItem(Icons.volume_up_outlined, tr(context, 'sound_effects'), sp.soundEffects, (v) => sp.toggleSoundEffects(v), cardColor, borderColor),
-        const SizedBox(height: 24),
-        _sectionTitle(context, tr(context, 'general')),
-        const SizedBox(height: 12),
-        _menuItemTap(Icons.language, tr(context, 'language'), sp.isArabic ? 'العربية' : 'English', () => _pickLanguage(context, sp), cardColor, borderColor),
-        const SizedBox(height: 8),
-        _menuItem(Icons.info_outline, tr(context, 'about'), 'v1.0.0', cardColor, borderColor),
-        const SizedBox(height: 24),
-        // Team button
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed: () => _showTeamOptions(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                elevation: 0,
-              ),
-              child: Text('Team', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        // Sign out
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: GestureDetector(
-            onTap: () async {
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                  title: Text(tr(context, 'sign_out_title'), style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
-                  content: Text(tr(context, 'sign_out_msg'), style: GoogleFonts.inter()),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr(context, 'cancel'))),
-                    TextButton(onPressed: () => Navigator.pop(ctx, true),
-                        child: Text(tr(context, 'sign_out'), style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: AppColors.urgentRed))),
+          const SizedBox(height: 28),
+          // Profile
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: GestureDetector(
+              onTap: () => _editProfile(context, auth),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: borderColor),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(shape: BoxShape.circle, gradient: AppColors.primaryGradient),
+                      child: Center(
+                        child: Text(
+                          user != null ? user.name[0].toUpperCase() : 'U',
+                          style: GoogleFonts.manrope(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(user?.name ?? 'User', style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 4),
+                          Text(
+                            user?.email ?? '',
+                            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w400, color: AppColors.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.edit_outlined, size: 20, color: AppColors.primary),
                   ],
                 ),
-              );
-              if (confirmed == true && context.mounted) {
-                await auth.signOut();
-                if (context.mounted) {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const SignInScreen()), (_) => false);
-                }
-              }
-            },
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: AppColors.urgentRed.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(16)),
-              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Icon(Icons.logout, size: 20, color: AppColors.urgentRed),
-                const SizedBox(width: 8),
-                Text(tr(context, 'sign_out'), style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.urgentRed)),
-              ]),
+              ),
             ),
           ),
-        ),
-      ]),
+          const SizedBox(height: 24),
+          _sectionTitle(context, tr(context, 'preferences')),
+          const SizedBox(height: 12),
+          _toggleItem(Icons.dark_mode_outlined, tr(context, 'dark_mode'), sp.isDarkMode, (v) => sp.toggleDarkMode(v), cardColor, borderColor),
+          const SizedBox(height: 8),
+          _toggleItem(Icons.notifications_outlined, tr(context, 'push_notifications'), sp.notifications, (v) => sp.toggleNotifications(v), cardColor, borderColor),
+          const SizedBox(height: 8),
+          _toggleItem(Icons.volume_up_outlined, tr(context, 'sound_effects'), sp.soundEffects, (v) => sp.toggleSoundEffects(v), cardColor, borderColor),
+          const SizedBox(height: 24),
+          _sectionTitle(context, tr(context, 'general')),
+          const SizedBox(height: 12),
+          _menuItemTap(Icons.language, tr(context, 'language'), sp.isArabic ? 'العربية' : 'English', () => _pickLanguage(context, sp), cardColor, borderColor),
+          const SizedBox(height: 8),
+          _menuItem(Icons.info_outline, tr(context, 'about'), 'v1.0.0', cardColor, borderColor),
+          const SizedBox(height: 24),
+          // Team button
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: () => _showTeamOptions(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Team',
+                  style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Sign out
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: GestureDetector(
+              onTap: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                    title: Text(tr(context, 'sign_out_title'), style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
+                    content: Text(tr(context, 'sign_out_msg'), style: GoogleFonts.inter()),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr(context, 'cancel'))),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: Text(
+                          tr(context, 'sign_out'),
+                          style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: AppColors.urgentRed),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true && context.mounted) {
+                  await auth.signOut();
+                  if (context.mounted) {
+                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const SignInScreen()), (_) => false);
+                  }
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: AppColors.urgentRed.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(16)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.logout, size: 20, color: AppColors.urgentRed),
+                    const SizedBox(width: 8),
+                    Text(
+                      tr(context, 'sign_out'),
+                      style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.urgentRed),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
+
   void _showTeamOptions(BuildContext context) {
     final teamProvider = context.read<TeamProvider>();
 
     showModalBottomSheet(
-      context: context, backgroundColor: Colors.transparent,
+      context: context,
+      backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(color: context.adaptiveSurface, borderRadius: const BorderRadius.vertical(top: Radius.circular(32))),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.outlineVariant, borderRadius: BorderRadius.circular(2))),
-          const SizedBox(height: 20),
-          Text(tr(context, 'team'), style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 20),
-          if (teamProvider.isInTeam) ...[
-            // User is already in a team — show "Go to My Team" and "Leave Team"
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  _navigateToTeamDashboard(context, teamProvider);
-                },
-                icon: const Icon(Icons.group_rounded, size: 20, color: Colors.white),
-                label: Text(tr(context, 'go_to_my_team'), style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
+        decoration: BoxDecoration(
+          color: context.adaptiveSurface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(color: AppColors.outlineVariant, borderRadius: BorderRadius.circular(2)),
+            ),
+            const SizedBox(height: 20),
+            Text(tr(context, 'team'), style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 20),
+            if (teamProvider.isInTeam) ...[
+              // User is already in a team — show "Go to My Team" and "Leave Team"
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    _navigateToTeamDashboard(context, teamProvider);
+                  },
+                  icon: const Icon(Icons.group_rounded, size: 20, color: Colors.white),
+                  label: Text(
+                    tr(context, 'go_to_my_team'),
+                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  _confirmLeaveTeam(context);
-                },
-                icon: const Icon(Icons.logout_rounded, size: 20, color: Color(0xFFEF4444)),
-                label: Text(
-                  teamProvider.isOwner ? tr(context, 'delete_team') : tr(context, 'leave_team'),
-                  style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: const Color(0xFFEF4444)),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    _confirmLeaveTeam(context);
+                  },
+                  icon: const Icon(Icons.logout_rounded, size: 20, color: Color(0xFFEF4444)),
+                  label: Text(
+                    teamProvider.isOwner ? tr(context, 'delete_team') : tr(context, 'leave_team'),
+                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: const Color(0xFFEF4444)),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
                 ),
               ),
-            ),
-          ] else ...[
-            // User is NOT in a team — show Create / Join
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTeamScreen()));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
+            ] else ...[
+              // User is NOT in a team — show Create / Join
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTeamScreen()));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    tr(context, 'create_team'),
+                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                  ),
                 ),
-                child: Text(tr(context, 'create_team'), style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
               ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const JoinTeamScreen()));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const JoinTeamScreen()));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    tr(context, 'join_team'),
+                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                  ),
                 ),
-                child: Text(tr(context, 'join_team'), style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
               ),
-            ),
+            ],
+            const SizedBox(height: 16),
           ],
-          const SizedBox(height: 16),
-        ]),
+        ),
       ),
     );
   }
@@ -234,23 +291,11 @@ class SettingsScreen extends StatelessWidget {
     if (teamProvider.isOwner) {
       destination = OwnerDashboardScreen(teamName: teamProvider.teamName!);
     } else if (teamProvider.isLeader) {
-      destination = LeaderDashboardScreen(
-        teamName: teamProvider.teamName!,
-        department: teamProvider.department ?? '',
-        userId: teamProvider.userId ?? '',
-      );
+      destination = LeaderDashboardScreen(teamName: teamProvider.teamName!, department: teamProvider.department ?? '', userId: teamProvider.userId ?? '');
     } else {
-      destination = MemberDashboardScreen(
-        teamName: teamProvider.teamName!,
-        department: teamProvider.department ?? '',
-        userId: teamProvider.userId ?? '',
-      );
+      destination = MemberDashboardScreen(teamName: teamProvider.teamName!, department: teamProvider.department ?? '', userId: teamProvider.userId ?? '');
     }
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => destination),
-      (_) => false,
-    );
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => destination), (_) => false);
   }
 
   void _confirmLeaveTeam(BuildContext context) {
@@ -260,16 +305,8 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(
-          isOwner ? tr(context, 'delete_team_q') : tr(context, 'leave_team_q'),
-          style: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-        ),
-        content: Text(
-          isOwner
-              ? tr(context, 'delete_team_msg')
-              : tr(context, 'leave_team_msg'),
-          style: GoogleFonts.inter(),
-        ),
+        title: Text(isOwner ? tr(context, 'delete_team_q') : tr(context, 'leave_team_q'), style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
+        content: Text(isOwner ? tr(context, 'delete_team_msg') : tr(context, 'leave_team_msg'), style: GoogleFonts.inter()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -278,14 +315,11 @@ class SettingsScreen extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              context.read<TeamProvider>().clearTeam();
+              context.read<TeamProvider>().clearTeam(deleteTeamRecord: isOwner);
               context.read<TeamTaskProvider>().clearAll();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(
-                    isOwner ? tr(context, 'team_deleted') : tr(context, 'left_team'),
-                    style: GoogleFonts.inter(fontWeight: FontWeight.w500),
-                  ),
+                  content: Text(isOwner ? tr(context, 'team_deleted') : tr(context, 'left_team'), style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
                   backgroundColor: AppColors.primary,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -308,66 +342,108 @@ class SettingsScreen extends StatelessWidget {
     final nameCtrl = TextEditingController(text: user.name);
     final emailCtrl = TextEditingController(text: user.email);
     showModalBottomSheet(
-      context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
-        decoration: BoxDecoration(color: context.adaptiveSurface, borderRadius: const BorderRadius.vertical(top: Radius.circular(32))),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.outlineVariant, borderRadius: BorderRadius.circular(2))),
-          const SizedBox(height: 20),
-          Text(tr(context, 'edit_profile'), style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 20),
-          TextField(controller: nameCtrl, style: GoogleFonts.inter(fontSize: 15),
-              decoration: InputDecoration(labelText: tr(context, 'full_name'), labelStyle: GoogleFonts.inter(fontSize: 13),
-                  prefixIcon: const Icon(Icons.person_outline, size: 20))),
-          const SizedBox(height: 12),
-          TextField(controller: emailCtrl, style: GoogleFonts.inter(fontSize: 15),
-              decoration: InputDecoration(labelText: tr(context, 'email'), labelStyle: GoogleFonts.inter(fontSize: 13),
-                  prefixIcon: const Icon(Icons.email_outlined, size: 20))),
-          const SizedBox(height: 20),
-          SizedBox(width: double.infinity, height: 52,
-            child: ElevatedButton(
-              onPressed: () async {
-                final ok = await auth.updateProfile(name: nameCtrl.text, email: emailCtrl.text);
-                if (ok && ctx.mounted) {
-                  Navigator.of(ctx).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(tr(context, 'profile_updated'), style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
-                        backgroundColor: AppColors.lowGreen, behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))));
-                } else if (auth.error != null && ctx.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(auth.error!, style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
-                        backgroundColor: AppColors.urgentRed, behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))));
-                }
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-              child: Text(tr(context, 'save'), style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
+        decoration: BoxDecoration(
+          color: context.adaptiveSurface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(color: AppColors.outlineVariant, borderRadius: BorderRadius.circular(2)),
             ),
-          ),
-        ]),
+            const SizedBox(height: 20),
+            Text(tr(context, 'edit_profile'), style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 20),
+            TextField(
+              controller: nameCtrl,
+              style: GoogleFonts.inter(fontSize: 15),
+              decoration: InputDecoration(labelText: tr(context, 'full_name'), labelStyle: GoogleFonts.inter(fontSize: 13), prefixIcon: const Icon(Icons.person_outline, size: 20)),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: emailCtrl,
+              style: GoogleFonts.inter(fontSize: 15),
+              decoration: InputDecoration(labelText: tr(context, 'email'), labelStyle: GoogleFonts.inter(fontSize: 13), prefixIcon: const Icon(Icons.email_outlined, size: 20)),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: () async {
+                  final ok = await auth.updateProfile(name: nameCtrl.text, email: emailCtrl.text);
+                  if (ok && ctx.mounted) {
+                    Navigator.of(ctx).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(tr(context, 'profile_updated'), style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+                        backgroundColor: AppColors.lowGreen,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    );
+                  } else if (auth.error != null && ctx.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(auth.error!, style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+                        backgroundColor: AppColors.urgentRed,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: Text(
+                  tr(context, 'save'),
+                  style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   void _pickLanguage(BuildContext context, SettingsProvider sp) {
     showModalBottomSheet(
-      context: context, backgroundColor: Colors.transparent,
+      context: context,
+      backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(color: context.adaptiveSurface, borderRadius: const BorderRadius.vertical(top: Radius.circular(32))),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.outlineVariant, borderRadius: BorderRadius.circular(2))),
-          const SizedBox(height: 20),
-          Text(tr(context, 'select_language'), style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 20),
-          _langOption(ctx, sp, 'English', 'en', Icons.language),
-          const SizedBox(height: 8),
-          _langOption(ctx, sp, 'العربية (Arabic)', 'ar', Icons.translate),
-          const SizedBox(height: 16),
-        ]),
+        decoration: BoxDecoration(
+          color: context.adaptiveSurface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(color: AppColors.outlineVariant, borderRadius: BorderRadius.circular(2)),
+            ),
+            const SizedBox(height: 20),
+            Text(tr(context, 'select_language'), style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 20),
+            _langOption(ctx, sp, 'English', 'en', Icons.language),
+            const SizedBox(height: 8),
+            _langOption(ctx, sp, 'العربية (Arabic)', 'ar', Icons.translate),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
@@ -375,74 +451,119 @@ class SettingsScreen extends StatelessWidget {
   Widget _langOption(BuildContext ctx, SettingsProvider sp, String label, String code, IconData icon) {
     final isActive = sp.language == code;
     return GestureDetector(
-      onTap: () { sp.setLanguage(code); Navigator.of(ctx).pop(); },
+      onTap: () {
+        sp.setLanguage(code);
+        Navigator.of(ctx).pop();
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
           color: isActive ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isActive ? AppColors.primary.withValues(alpha: 0.3) : AppColors.outlineVariant.withValues(alpha: 0.3))),
-        child: Row(children: [
-          Icon(icon, size: 22, color: isActive ? AppColors.primary : AppColors.onSurfaceVariant),
-          const SizedBox(width: 14),
-          Expanded(child: Text(label, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500, color: isActive ? AppColors.primary : null))),
-          if (isActive) Icon(Icons.check_circle, size: 22, color: AppColors.primary),
-        ]),
+          border: Border.all(color: isActive ? AppColors.primary.withValues(alpha: 0.3) : AppColors.outlineVariant.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 22, color: isActive ? AppColors.primary : AppColors.onSurfaceVariant),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500, color: isActive ? AppColors.primary : null),
+              ),
+            ),
+            if (isActive) Icon(Icons.check_circle, size: 22, color: AppColors.primary),
+          ],
+        ),
       ),
     );
   }
 
   Widget _sectionTitle(BuildContext context, String title) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Text(title, style: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w700, color: context.textSecondary)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 24),
+    child: Text(
+      title,
+      style: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w700, color: context.textSecondary),
+    ),
+  );
 
   Widget _toggleItem(IconData icon, String label, bool value, ValueChanged<bool> onChanged, Color cardColor, Color borderColor) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
-          child: Row(children: [
-            Icon(icon, size: 22, color: AppColors.onSurfaceVariant),
-            const SizedBox(width: 14),
-            Expanded(child: Text(label, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500))),
-            Switch.adaptive(value: value, onChanged: onChanged, activeTrackColor: AppColors.primary, activeThumbColor: Colors.white),
-          ]),
-        ),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 24),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 22, color: AppColors.onSurfaceVariant),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(label, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500)),
+          ),
+          Switch.adaptive(value: value, onChanged: onChanged, activeTrackColor: AppColors.primary, activeThumbColor: Colors.white),
+        ],
+      ),
+    ),
+  );
 
   Widget _menuItem(IconData icon, String label, String trailing, Color cardColor, Color borderColor) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
-          child: Row(children: [
-            Icon(icon, size: 22, color: AppColors.onSurfaceVariant),
-            const SizedBox(width: 14),
-            Expanded(child: Text(label, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500))),
-            if (trailing.isNotEmpty) Text(trailing, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant)),
-            const SizedBox(width: 4),
-            Icon(Icons.chevron_right, size: 18, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
-          ]),
-        ),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 24),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 22, color: AppColors.onSurfaceVariant),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(label, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500)),
+          ),
+          if (trailing.isNotEmpty)
+            Text(
+              trailing,
+              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant),
+            ),
+          const SizedBox(width: 4),
+          Icon(Icons.chevron_right, size: 18, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
+        ],
+      ),
+    ),
+  );
 
   Widget _menuItemTap(IconData icon, String label, String trailing, VoidCallback onTap, Color cardColor, Color borderColor) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
-            child: Row(children: [
-              Icon(icon, size: 22, color: AppColors.onSurfaceVariant),
-              const SizedBox(width: 14),
-              Expanded(child: Text(label, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500))),
-              Text(trailing, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant)),
-              const SizedBox(width: 4),
-              Icon(Icons.chevron_right, size: 18, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
-            ]),
-          ),
+    padding: const EdgeInsets.symmetric(horizontal: 24),
+    child: GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor),
         ),
-      );
+        child: Row(
+          children: [
+            Icon(icon, size: 22, color: AppColors.onSurfaceVariant),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(label, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500)),
+            ),
+            Text(
+              trailing,
+              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.onSurfaceVariant),
+            ),
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right, size: 18, color: AppColors.onSurfaceVariant.withValues(alpha: 0.4)),
+          ],
+        ),
+      ),
+    ),
+  );
 }
