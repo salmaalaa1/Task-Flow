@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'config/firebase_options.dart';
 import 'models/user_model.dart';
 import 'models/user_model.g.dart';
 import 'theme/app_theme.dart';
@@ -12,9 +14,14 @@ import 'providers/team_task_provider.dart';
 import 'providers/event_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/splash_screen.dart';
+import 'services/firebase_auth_service.dart';
+import 'services/firestore_database_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase powers Authentication and Firestore data storage.
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Init Hive
   await Hive.initFlutter();
@@ -38,13 +45,18 @@ class TaskFlowApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authService = FirebaseAuthService();
+    final databaseService = FirestoreDatabaseService();
+
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(authService: authService, databaseService: databaseService),
+        ),
         ChangeNotifierProvider(create: (_) => TaskProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
-        ChangeNotifierProvider(create: (_) => TeamProvider()),
-        ChangeNotifierProvider(create: (_) => TeamTaskProvider()),
+        ChangeNotifierProvider(create: (_) => TeamProvider(databaseService: databaseService)),
+        ChangeNotifierProvider(create: (_) => TeamTaskProvider(databaseService: databaseService)),
         ChangeNotifierProvider.value(value: settings),
       ],
       child: Consumer<SettingsProvider>(

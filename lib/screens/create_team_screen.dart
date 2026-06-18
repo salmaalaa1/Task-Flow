@@ -232,7 +232,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                   boxShadow: [BoxShadow(color: const Color(0xFF3B82F6).withValues(alpha: 0.3), blurRadius: 16, offset: const Offset(0, 6))],
                 ),
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     final teamName = _teamNameCtrl.text.trim();
                     final description = _descriptionCtrl.text.trim();
                     final password = _passwordCtrl.text.trim();
@@ -274,7 +274,8 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                     // Save team data persistently
                     final auth = context.read<AuthProvider>();
                     final teamProvider = context.read<TeamProvider>();
-                    teamProvider.createTeam(teamName: teamName, description: description, password: password, ownerUserId: auth.currentUser?.id, ownerName: auth.currentUser?.name);
+                    await teamProvider.createTeam(teamName: teamName, description: description, password: password, ownerUserId: auth.currentUser?.id, ownerName: auth.currentUser?.name, ownerEmail: auth.currentUser?.email);
+                    if (!context.mounted) return;
 
                     Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => OwnerDashboardScreen(teamName: teamName)), (_) => false);
                   },

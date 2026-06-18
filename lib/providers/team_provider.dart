@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../services/firestore_database_service.dart';
 
 /// Manages team state with Hive persistence.
 /// Stores: teamName, description, password, role, department, userId, members list.
 class TeamProvider extends ChangeNotifier {
+  TeamProvider({FirestoreDatabaseService? databaseService}) : _databaseService = databaseService {
+    _loadFromHive();
+  }
+
   static const _boxName = 'team';
   static const validDepartments = {'Programming', 'Media', 'Operation'};
 
@@ -15,8 +20,13 @@ class TeamProvider extends ChangeNotifier {
   static const _kDepartment = 'department';
   static const _kUserId = 'userId';
   static const _kMembers = 'members'; // List<String> of member names
+  static const _kMemberInfos = 'memberInfos';
   static const _kTeamDirectory = 'teamDirectory';
+  static const _kTeamId = 'teamId';
 
+  final FirestoreDatabaseService? _databaseService;
+
+  String? _teamId;
   String? _teamName;
   String? _description;
   String? _password;
@@ -24,13 +34,11 @@ class TeamProvider extends ChangeNotifier {
   String? _department;
   String? _userId;
   List<String> _members = [];
+  List<TeamMemberInfo> _memberInfos = [];
   Map<String, Map<String, dynamic>> _teamDirectory = {};
 
-  TeamProvider() {
-    _loadFromHive();
-  }
-
   // --- Getters ---
+  String? get teamId => _teamId;
   String? get teamName => _teamName;
   String? get description => _description;
   String? get password => _password;
@@ -39,6 +47,7 @@ class TeamProvider extends ChangeNotifier {
   String? get userId => _userId;
   List<String> get members => List.unmodifiable(_members);
   List<TeamMemberInfo> get memberInfos {
+    if (_memberInfos.isNotEmpty) return List.unmodifiable(_memberInfos);
     if (_teamName == null) return const [];
     final teamRecord = _teamDirectory[_normalizeTeamName(_teamName!)];
     if (teamRecord == null) return const [];
@@ -56,6 +65,7 @@ class TeamProvider extends ChangeNotifier {
   // --- Load persisted data ---
   void _loadFromHive() {
     final box = Hive.box(_boxName);
+    _teamId = box.get(_kTeamId) as String?;
     _teamName = box.get(_kTeamName) as String?;
     _description = box.get(_kDescription) as String?;
     _password = box.get(_kPassword) as String?;
@@ -66,15 +76,29 @@ class TeamProvider extends ChangeNotifier {
     if (rawMembers != null) {
       _members = List<String>.from(rawMembers as List);
     }
+    final rawMemberInfos = box.get(_kMemberInfos);
+    if (rawMemberInfos is List) {
+      _memberInfos = rawMemberInfos.map((member) => TeamMemberInfo.fromMap(Map<String, dynamic>.from(member as Map))).toList(growable: false);
+    }
     final rawDirectory = box.get(_kTeamDirectory);
     if (rawDirectory != null) {
       _teamDirectory = (rawDirectory as Map).map((key, value) => MapEntry(key as String, Map<String, dynamic>.from(value as Map)));
+    }
+    if (_teamName != null) {
+      final teamRecord = _teamDirectory[_normalizeTeamName(_teamName!)];
+      if (teamRecord != null) {
+        _memberInfos = _directoryMembers(teamRecord)
+            .map((member) => TeamMemberInfo(userId: member['userId'] ?? '', name: member['name'] ?? '', email: member['email'] ?? '', department: member['department'] ?? '', role: member['role'] ?? ''))
+            .where((member) => member.userId.isNotEmpty && member.name.isNotEmpty)
+            .toList(growable: false);
+      }
     }
     notifyListeners();
   }
 
   Future<void> _persist() async {
     final box = Hive.box(_boxName);
+    await box.put(_kTeamId, _teamId);
     await box.put(_kTeamName, _teamName);
     await box.put(_kDescription, _description);
     await box.put(_kPassword, _password);
@@ -82,6 +106,7 @@ class TeamProvider extends ChangeNotifier {
     await box.put(_kDepartment, _department);
     await box.put(_kUserId, _userId);
     await box.put(_kMembers, _members);
+    await box.put(_kMemberInfos, _memberInfos.map((member) => member.toMap()).toList());
     await box.put(_kTeamDirectory, _teamDirectory);
   }
 
@@ -103,10 +128,29 @@ class TeamProvider extends ChangeNotifier {
   // --- Actions ---
 
   /// Called when user creates a team (becomes owner).
-  Future<void> createTeam({required String teamName, required String description, required String password, String? ownerUserId, String? ownerName}) async {
+  Future<void> createTeam({required String teamName, required String description, required String password, String? ownerUserId, String? ownerName, String? ownerEmail}) async {
     final normalizedName = teamName.trim().replaceAll(RegExp(r'\s+'), ' ');
     final normalizedDescription = description.trim();
     final normalizedPassword = password.trim();
+
+    if (_databaseService != null) {
+      if (ownerUserId == null || ownerUserId.trim().isEmpty) {
+        throw StateError('You must be signed in to create a team.');
+      }
+      final team = await _databaseService.createTeam(name: normalizedName, description: normalizedDescription, password: normalizedPassword, ownerUserId: ownerUserId, ownerName: ownerName ?? 'Owner', ownerEmail: ownerEmail ?? '');
+      _teamId = team.id;
+      _teamName = team.name;
+      _description = team.description;
+      _password = null;
+      _role = 'owner';
+      _department = null;
+      _userId = ownerUserId;
+      _members = team.members.map((member) => member.name).where((name) => name.isNotEmpty).toList();
+      _memberInfos = team.members.map((member) => TeamMemberInfo(userId: member.userId, name: member.name, email: member.email, department: member.department, role: member.role)).toList(growable: false);
+      notifyListeners();
+      await _persist();
+      return;
+    }
 
     _teamName = normalizedName;
     _description = normalizedDescription;
@@ -156,6 +200,33 @@ class TeamProvider extends ChangeNotifier {
     }
     if (!RegExp(r'^[\w\.\-\+]+@[\w\-]+\.\w{2,}$').hasMatch(normalizedEmail)) {
       return const TeamJoinResult(false, 'Use a valid account email.');
+    }
+
+    if (_databaseService != null) {
+      final response = await _databaseService.joinTeam(
+        teamName: normalizedName,
+        password: normalizedPassword,
+        userId: normalizedUserId,
+        displayName: normalizedDisplayName,
+        email: normalizedEmail,
+        department: normalizedDepartment,
+        role: role == 'leader' ? TeamRole.leader : TeamRole.member,
+      );
+      if (!response.success || response.team == null) {
+        return TeamJoinResult(false, response.message ?? 'Unable to join team.');
+      }
+      _teamId = response.team!.id;
+      _teamName = response.team!.name;
+      _description = response.team!.description;
+      _password = null;
+      _role = role;
+      _department = normalizedDepartment;
+      _userId = normalizedUserId;
+      _members = response.team!.members.map((member) => member.name).where((name) => name.isNotEmpty).toList();
+      _memberInfos = response.team!.members.map((member) => TeamMemberInfo(userId: member.userId, name: member.name, email: member.email, department: member.department, role: member.role)).toList(growable: false);
+      notifyListeners();
+      await _persist();
+      return const TeamJoinResult(true);
     }
 
     final teamRecord = _teamDirectory[_normalizeTeamName(normalizedName)];
@@ -211,6 +282,7 @@ class TeamProvider extends ChangeNotifier {
   /// Clears all team data (leave or delete team).
   Future<void> clearTeam({bool deleteTeamRecord = false}) async {
     final currentTeamKey = _teamName == null ? null : _normalizeTeamName(_teamName!);
+    _teamId = null;
     _teamName = null;
     _description = null;
     _password = null;
@@ -218,6 +290,7 @@ class TeamProvider extends ChangeNotifier {
     _department = null;
     _userId = null;
     _members = [];
+    _memberInfos = [];
     if (deleteTeamRecord && currentTeamKey != null) {
       _teamDirectory.remove(currentTeamKey);
     }
@@ -241,4 +314,9 @@ class TeamMemberInfo {
   final String role;
 
   const TeamMemberInfo({required this.userId, required this.name, required this.email, required this.department, required this.role});
+
+  Map<String, dynamic> toMap() => {'userId': userId, 'name': name, 'email': email, 'department': department, 'role': role};
+
+  factory TeamMemberInfo.fromMap(Map<String, dynamic> map) =>
+      TeamMemberInfo(userId: map['userId'] as String? ?? '', name: map['name'] as String? ?? '', email: map['email'] as String? ?? '', department: map['department'] as String? ?? '', role: map['role'] as String? ?? '');
 }

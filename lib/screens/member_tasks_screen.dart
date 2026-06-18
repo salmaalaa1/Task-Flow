@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/team_provider.dart';
 import '../providers/team_task_provider.dart';
 import '../models/team_task_model.dart';
 import '../theme/theme_utils.dart';
@@ -21,6 +22,8 @@ class MemberTasksScreen extends StatelessWidget {
     final cardColor = context.cardColor;
 
     final tp = context.watch<TeamTaskProvider>();
+    final teamProvider = context.watch<TeamProvider>();
+    tp.watchTeamTasks(teamId: teamProvider.teamId, assignedToUserId: userId, createdByUserId: userId, createdByRole: 'member');
     final currentUserName = context.watch<AuthProvider>().currentUser?.name;
     // Filter tasks to show only those assigned to this authenticated member.
     final myTasks = tp.tasksForUser(userId, fallbackName: currentUserName);

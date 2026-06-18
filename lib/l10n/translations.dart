@@ -14,6 +14,11 @@ String tr(BuildContext context, String key) {
   return map[lang] ?? map['en'] ?? key;
 }
 
+String localizedAuthMessage(BuildContext context, String message) {
+  final key = _authMessageKeys[message];
+  return key == null ? message : tr(context, key);
+}
+
 String taskPriorityLabel(BuildContext context, TaskPriority priority) {
   switch (priority) {
     case TaskPriority.urgent:
@@ -76,6 +81,13 @@ const Map<String, Map<String, String>> _translations = {
   'min_6_chars': {'en': 'Min 6 characters', 'ar': 'على الأقل 6 أحرف'},
   'reenter_password': {'en': 'Re-enter your password', 'ar': 'أعد إدخال كلمة المرور'},
   'reenter_new_password': {'en': 'Re-enter password', 'ar': 'أعد إدخال كلمة المرور'},
+  'email_required': {'en': 'Email is required', 'ar': 'البريد الإلكتروني مطلوب'},
+  'valid_email_required': {'en': 'Enter a valid email', 'ar': 'أدخل بريدًا إلكترونيًا صالحًا'},
+  'password_required': {'en': 'Password is required', 'ar': 'كلمة المرور مطلوبة'},
+  'password_min_6': {'en': 'Password must be at least 6 characters', 'ar': 'يجب أن تكون كلمة المرور 6 أحرف على الأقل'},
+  'account_not_found': {'en': 'No account found with this email', 'ar': 'لا يوجد حساب بهذا البريد الإلكتروني'},
+  'incorrect_password': {'en': 'Incorrect password', 'ar': 'كلمة المرور غير صحيحة'},
+  'generic_error_retry': {'en': 'Something went wrong. Please try again.', 'ar': 'حدث خطأ ما. الرجاء المحاولة مرة أخرى.'},
 
   // ─── Home ────────────────────────────────
   'good_morning': {'en': 'Good Morning', 'ar': 'صباح الخير'},
@@ -360,4 +372,14 @@ const Map<String, Map<String, String>> _translations = {
   'oct_short': {'en': 'OCT', 'ar': 'أكت'},
   'nov_short': {'en': 'NOV', 'ar': 'نوف'},
   'dec_short': {'en': 'DEC', 'ar': 'ديس'},
+};
+
+const Map<String, String> _authMessageKeys = {
+  'Email is required': 'email_required',
+  'Enter a valid email': 'valid_email_required',
+  'Password is required': 'password_required',
+  'Password must be at least 6 characters': 'password_min_6',
+  'No account found with this email': 'account_not_found',
+  'Incorrect password': 'incorrect_password',
+  'Something went wrong. Please try again.': 'generic_error_retry',
 };

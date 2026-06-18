@@ -1,16 +1,29 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/team_task_model.dart';
+import '../services/firestore_database_service.dart';
 
 /// Manages team tasks with Hive persistence — same pattern as TaskProvider.
 class TeamTaskProvider extends ChangeNotifier {
-  static const _boxName = 'team_tasks';
-
-  List<TeamTask> _tasks = [];
-
-  TeamTaskProvider() {
+  TeamTaskProvider({FirestoreDatabaseService? databaseService}) : _databaseService = databaseService {
     _loadFromHive();
   }
+
+  static const _boxName = 'team_tasks';
+
+  final FirestoreDatabaseService? _databaseService;
+  List<TeamTask> _tasks = [];
+  StreamSubscription<List<TeamTask>>? _taskSub;
+  String? _teamId;
+  String? _assignedToUserId;
+  String? _createdByUserId;
+  String? _createdByRole;
+
+  bool get _usesFirestore => _databaseService != null && _teamId != null;
+  FirestoreDatabaseService get _firestore => _databaseService!;
+  String get _activeTeamId => _teamId!;
 
   // --- Load persisted data ---
   void _loadFromHive() {
@@ -65,13 +78,36 @@ class TeamTaskProvider extends ChangeNotifier {
   }
 
   // --- Actions ---
+  void watchTeamTasks({required String? teamId, String? assignedToUserId, String? createdByUserId, String? createdByRole}) {
+    if (_databaseService == null || teamId == null || teamId.isEmpty) return;
+    if (_teamId == teamId && _assignedToUserId == assignedToUserId && _createdByUserId == createdByUserId && _createdByRole == createdByRole) return;
+    _teamId = teamId;
+    _assignedToUserId = assignedToUserId;
+    _createdByUserId = createdByUserId;
+    _createdByRole = createdByRole;
+    _taskSub?.cancel();
+    final stream = assignedToUserId == null || assignedToUserId.isEmpty ? _firestore.watchTeamTasks(teamId) : _firestore.watchAssignedTasks(teamId: teamId, userId: assignedToUserId);
+    _taskSub = stream.listen((tasks) {
+      _tasks = tasks;
+      notifyListeners();
+    });
+  }
+
   void addTask(TeamTask task) {
+    if (_usesFirestore) {
+      _firestore.createTask(teamId: _activeTeamId, task: task, createdByUserId: _createdByUserId ?? '', createdByRole: _createdByRole ?? '');
+      return;
+    }
     _tasks.insert(0, task);
     notifyListeners();
     _persist();
   }
 
   void deleteTask(String id) {
+    if (_usesFirestore) {
+      _firestore.deleteTask(teamId: _activeTeamId, taskId: id);
+      return;
+    }
     _tasks.removeWhere((t) => t.id == id);
     notifyListeners();
     _persist();
@@ -91,6 +127,11 @@ class TeamTaskProvider extends ChangeNotifier {
   bool toggleStatusForUser(String id, String userId, {String? fallbackName}) {
     final task = _taskForUser(id, userId, fallbackName: fallbackName);
     if (task == null) return false;
+    final nextStatus = task.isDone ? 'pending' : 'done';
+    if (_usesFirestore) {
+      _firestore.updateAssignedTaskStatus(teamId: _activeTeamId, taskId: id, userId: userId, status: nextStatus);
+      return true;
+    }
     if (task.isDone) {
       task.status = 'pending';
     } else {
@@ -111,6 +152,10 @@ class TeamTaskProvider extends ChangeNotifier {
   bool updateNoteForUser(String id, String userId, String note, {String? fallbackName}) {
     final task = _taskForUser(id, userId, fallbackName: fallbackName);
     if (task == null) return false;
+    if (_usesFirestore) {
+      _firestore.updateAssignedTaskNote(teamId: _activeTeamId, taskId: id, userId: userId, note: note);
+      return true;
+    }
     task.note = note;
     notifyListeners();
     _persist();
@@ -126,6 +171,11 @@ class TeamTaskProvider extends ChangeNotifier {
 
   /// Clear all tasks (when team is deleted/left)
   Future<void> clearAll() async {
+    if (_usesFirestore) {
+      _tasks.clear();
+      notifyListeners();
+      return;
+    }
     _tasks.clear();
     notifyListeners();
     final box = Hive.box(_boxName);
@@ -146,5 +196,11 @@ class TeamTaskProvider extends ChangeNotifier {
       return null;
     }
     return null;
+  }
+
+  @override
+  void dispose() {
+    _taskSub?.cancel();
+    super.dispose();
   }
 }

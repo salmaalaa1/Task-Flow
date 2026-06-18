@@ -22,6 +22,7 @@ class OwnerTeamScreen extends StatelessWidget {
 
     final tp = context.watch<TeamTaskProvider>();
     final teamProv = context.watch<TeamProvider>();
+    tp.watchTeamTasks(teamId: teamProv.teamId, createdByUserId: teamProv.userId, createdByRole: 'owner');
     final completionPct = tp.totalCount == 0 ? 0.0 : tp.completionRate;
     final healthScore = tp.totalCount == 0 ? 0 : (completionPct * 100).toInt();
 

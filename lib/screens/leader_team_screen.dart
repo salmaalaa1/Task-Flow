@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../providers/team_provider.dart';
 import '../providers/team_task_provider.dart';
 import '../models/team_task_model.dart';
 import '../theme/theme_utils.dart';
@@ -21,6 +22,8 @@ class LeaderTeamScreen extends StatelessWidget {
     final fieldColor = context.inputFill;
 
     final tp = context.watch<TeamTaskProvider>();
+    final teamProvider = context.watch<TeamProvider>();
+    tp.watchTeamTasks(teamId: teamProvider.teamId, createdByUserId: teamProvider.userId, createdByRole: 'leader');
     final tasks = tp.allTasks;
     final completionPct = tp.totalCount == 0 ? 0.0 : tp.completionRate;
 

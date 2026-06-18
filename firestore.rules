@@ -1,0 +1,77 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function memberDoc(teamId, userId) {
+      return get(/databases/$(database)/documents/teams/$(teamId)/members/$(userId));
+    }
+
+    function isTeamMember(teamId) {
+      return signedIn() && exists(/databases/$(database)/documents/teams/$(teamId)/members/$(request.auth.uid));
+    }
+
+    function roleIn(teamId, roles) {
+      return isTeamMember(teamId) && memberDoc(teamId, request.auth.uid).data.role in roles;
+    }
+
+    function isOwner(teamId) {
+      return roleIn(teamId, ['owner']);
+    }
+
+    function isOwnerOrLeader(teamId) {
+      return roleIn(teamId, ['owner', 'leader']);
+    }
+
+    match /users/{userId} {
+      allow create, read, update: if isSelf(userId);
+      allow delete: if false;
+    }
+
+    match /teams/{teamId} {
+      allow create: if signedIn() && request.resource.data.ownerUserId == request.auth.uid;
+
+      // Authenticated users may discover teams to join by name. Do not expose
+      // sensitive data in the team document beyond the join-password hash.
+      allow list, get: if signedIn();
+
+      allow update: if isOwner(teamId);
+      allow delete: if isOwner(teamId);
+
+      match /members/{memberId} {
+        allow read: if isTeamMember(teamId);
+
+        // Users can create their own membership document during join; owners can
+        // manage membership as part of team administration.
+        allow create: if isSelf(memberId) || isOwner(teamId);
+        allow update: if isSelf(memberId) || isOwner(teamId);
+        allow delete: if isOwner(teamId);
+      }
+
+      match /tasks/{taskId} {
+        allow read: if isOwnerOrLeader(teamId) || (signedIn() && resource.data.assignedToUserId == request.auth.uid);
+
+        allow create: if isOwnerOrLeader(teamId)
+          && request.resource.data.assignedToUserId is string
+          && request.resource.data.assignedToUserId.size() > 0;
+
+        allow update: if isOwnerOrLeader(teamId)
+          || (
+            signedIn()
+            && resource.data.assignedToUserId == request.auth.uid
+            && request.resource.data.assignedToUserId == resource.data.assignedToUserId
+            && request.resource.data.diff(resource.data).changedKeys().hasOnly(['status', 'note', 'updatedAt'])
+          );
+
+        allow delete: if isOwner(teamId);
+      }
+    }
+  }
+}

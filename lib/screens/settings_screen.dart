@@ -113,7 +113,7 @@ class SettingsScreen extends StatelessWidget {
                   elevation: 0,
                 ),
                 child: Text(
-                  'Team',
+                  tr(context, 'team'),
                   style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
                 ),
               ),

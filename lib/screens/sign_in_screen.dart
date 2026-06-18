@@ -90,7 +90,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            auth.error!,
+                            localizedAuthMessage(context, auth.error!),
                             style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.urgentRed),
                           ),
                         ),
@@ -104,7 +104,10 @@ class _SignInScreenState extends State<SignInScreen> {
                 _label(tr(context, 'email')),
                 TextFormField(
                   controller: _emailCtrl,
-                  validator: AuthProvider.validateEmail,
+                  validator: (value) {
+                    final message = AuthProvider.validateEmail(value);
+                    return message == null ? null : localizedAuthMessage(context, message);
+                  },
                   keyboardType: TextInputType.emailAddress,
                   style: GoogleFonts.inter(fontSize: 15, color: context.textPrimary),
                   decoration: _inputDec(tr(context, 'enter_email'), Icons.email_outlined),
@@ -115,7 +118,10 @@ class _SignInScreenState extends State<SignInScreen> {
                 _label(tr(context, 'password')),
                 TextFormField(
                   controller: _passCtrl,
-                  validator: AuthProvider.validatePassword,
+                  validator: (value) {
+                    final message = AuthProvider.validatePassword(value);
+                    return message == null ? null : localizedAuthMessage(context, message);
+                  },
                   obscureText: _obscure,
                   style: GoogleFonts.inter(fontSize: 15, color: context.textPrimary),
                   decoration: _inputDec(tr(context, 'enter_password'), Icons.lock_outline).copyWith(
