@@ -34,11 +34,11 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'REPLACE_WITH_FIREBASE_ANDROID_API_KEY',
-    appId: 'REPLACE_WITH_FIREBASE_ANDROID_APP_ID',
-    messagingSenderId: 'REPLACE_WITH_FIREBASE_MESSAGING_SENDER_ID',
-    projectId: 'REPLACE_WITH_FIREBASE_PROJECT_ID',
-    storageBucket: 'REPLACE_WITH_FIREBASE_PROJECT_ID.appspot.com',
+    apiKey: 'AIzaSyCnSK81-nIB1FelAXNLnh6HMjcFY3Gw2Kw',
+    appId: '1:98425329022:android:c5fb8c7282e183e1928f2f',
+    messagingSenderId: '98425329022',
+    projectId: 'taskflow-1477b',
+    storageBucket: 'taskflow-1477b.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

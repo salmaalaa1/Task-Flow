@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../services/firestore_database_service.dart';
@@ -5,7 +7,8 @@ import '../services/firestore_database_service.dart';
 /// Manages team state with Hive persistence.
 /// Stores: teamName, description, password, role, department, userId, members list.
 class TeamProvider extends ChangeNotifier {
-  TeamProvider({FirestoreDatabaseService? databaseService}) : _databaseService = databaseService {
+  TeamProvider({FirestoreDatabaseService? databaseService})
+    : _databaseService = databaseService {
     _loadFromHive();
   }
 
@@ -25,6 +28,9 @@ class TeamProvider extends ChangeNotifier {
   static const _kTeamId = 'teamId';
 
   final FirestoreDatabaseService? _databaseService;
+  FirestoreDatabaseService get _firestore => _databaseService!;
+  StreamSubscription<List<TeamMemberRecord>>? _membersSub;
+  String? _watchedMembersTeamId;
 
   String? _teamId;
   String? _teamName;
@@ -52,7 +58,15 @@ class TeamProvider extends ChangeNotifier {
     final teamRecord = _teamDirectory[_normalizeTeamName(_teamName!)];
     if (teamRecord == null) return const [];
     return _directoryMembers(teamRecord)
-        .map((member) => TeamMemberInfo(userId: member['userId'] ?? '', name: member['name'] ?? '', email: member['email'] ?? '', department: member['department'] ?? '', role: member['role'] ?? ''))
+        .map(
+          (member) => TeamMemberInfo(
+            userId: member['userId'] ?? '',
+            name: member['name'] ?? '',
+            email: member['email'] ?? '',
+            department: member['department'] ?? '',
+            role: member['role'] ?? '',
+          ),
+        )
         .where((member) => member.userId.isNotEmpty && member.name.isNotEmpty)
         .toList(growable: false);
   }
@@ -61,6 +75,32 @@ class TeamProvider extends ChangeNotifier {
   bool get isOwner => _role == 'owner';
   bool get isLeader => _role == 'leader';
   bool get isMember => _role == 'member';
+
+  void watchTeamMembers(String? teamId) {
+    if (_databaseService == null || teamId == null || teamId.isEmpty) return;
+    if (_watchedMembersTeamId == teamId) return;
+    _watchedMembersTeamId = teamId;
+    _membersSub?.cancel();
+    _membersSub = _firestore.watchTeamMembers(teamId).listen((members) async {
+      _memberInfos = members
+          .map(
+            (member) => TeamMemberInfo(
+              userId: member.userId,
+              name: member.name,
+              email: member.email,
+              department: member.department,
+              role: member.role,
+            ),
+          )
+          .where((member) => member.userId.isNotEmpty && member.name.isNotEmpty)
+          .toList(growable: false);
+      _members = _memberInfos
+          .map((member) => member.name)
+          .toList(growable: false);
+      await _persist();
+      notifyListeners();
+    });
+  }
 
   // --- Load persisted data ---
   void _loadFromHive() {
@@ -78,18 +118,37 @@ class TeamProvider extends ChangeNotifier {
     }
     final rawMemberInfos = box.get(_kMemberInfos);
     if (rawMemberInfos is List) {
-      _memberInfos = rawMemberInfos.map((member) => TeamMemberInfo.fromMap(Map<String, dynamic>.from(member as Map))).toList(growable: false);
+      _memberInfos = rawMemberInfos
+          .map(
+            (member) => TeamMemberInfo.fromMap(
+              Map<String, dynamic>.from(member as Map),
+            ),
+          )
+          .toList(growable: false);
     }
     final rawDirectory = box.get(_kTeamDirectory);
     if (rawDirectory != null) {
-      _teamDirectory = (rawDirectory as Map).map((key, value) => MapEntry(key as String, Map<String, dynamic>.from(value as Map)));
+      _teamDirectory = (rawDirectory as Map).map(
+        (key, value) =>
+            MapEntry(key as String, Map<String, dynamic>.from(value as Map)),
+      );
     }
     if (_teamName != null) {
       final teamRecord = _teamDirectory[_normalizeTeamName(_teamName!)];
       if (teamRecord != null) {
         _memberInfos = _directoryMembers(teamRecord)
-            .map((member) => TeamMemberInfo(userId: member['userId'] ?? '', name: member['name'] ?? '', email: member['email'] ?? '', department: member['department'] ?? '', role: member['role'] ?? ''))
-            .where((member) => member.userId.isNotEmpty && member.name.isNotEmpty)
+            .map(
+              (member) => TeamMemberInfo(
+                userId: member['userId'] ?? '',
+                name: member['name'] ?? '',
+                email: member['email'] ?? '',
+                department: member['department'] ?? '',
+                role: member['role'] ?? '',
+              ),
+            )
+            .where(
+              (member) => member.userId.isNotEmpty && member.name.isNotEmpty,
+            )
             .toList(growable: false);
       }
     }
@@ -106,21 +165,31 @@ class TeamProvider extends ChangeNotifier {
     await box.put(_kDepartment, _department);
     await box.put(_kUserId, _userId);
     await box.put(_kMembers, _members);
-    await box.put(_kMemberInfos, _memberInfos.map((member) => member.toMap()).toList());
+    await box.put(
+      _kMemberInfos,
+      _memberInfos.map((member) => member.toMap()).toList(),
+    );
     await box.put(_kTeamDirectory, _teamDirectory);
   }
 
-  String _normalizeTeamName(String value) => value.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase();
+  String _normalizeTeamName(String value) =>
+      value.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase();
 
   List<Map<String, String>> _directoryMembers(Map<String, dynamic> teamRecord) {
     final rawMembers = teamRecord['members'];
     if (rawMembers is! List) return [];
-    return rawMembers.map((member) => Map<String, String>.from(member as Map)).toList();
+    return rawMembers
+        .map((member) => Map<String, String>.from(member as Map))
+        .toList();
   }
 
-  bool teamExists(String teamName) => _teamDirectory.containsKey(_normalizeTeamName(teamName));
+  bool teamExists(String teamName) =>
+      _teamDirectory.containsKey(_normalizeTeamName(teamName));
 
-  bool passwordMatchesTeam({required String teamName, required String password}) {
+  bool passwordMatchesTeam({
+    required String teamName,
+    required String password,
+  }) {
     final teamRecord = _teamDirectory[_normalizeTeamName(teamName)];
     return teamRecord != null && teamRecord['password'] == password;
   }
@@ -128,7 +197,14 @@ class TeamProvider extends ChangeNotifier {
   // --- Actions ---
 
   /// Called when user creates a team (becomes owner).
-  Future<void> createTeam({required String teamName, required String description, required String password, String? ownerUserId, String? ownerName, String? ownerEmail}) async {
+  Future<void> createTeam({
+    required String teamName,
+    required String description,
+    required String password,
+    String? ownerUserId,
+    String? ownerName,
+    String? ownerEmail,
+  }) async {
     final normalizedName = teamName.trim().replaceAll(RegExp(r'\s+'), ' ');
     final normalizedDescription = description.trim();
     final normalizedPassword = password.trim();
@@ -137,7 +213,14 @@ class TeamProvider extends ChangeNotifier {
       if (ownerUserId == null || ownerUserId.trim().isEmpty) {
         throw StateError('You must be signed in to create a team.');
       }
-      final team = await _databaseService.createTeam(name: normalizedName, description: normalizedDescription, password: normalizedPassword, ownerUserId: ownerUserId, ownerName: ownerName ?? 'Owner', ownerEmail: ownerEmail ?? '');
+      final team = await _databaseService.createTeam(
+        name: normalizedName,
+        description: normalizedDescription,
+        password: normalizedPassword,
+        ownerUserId: ownerUserId,
+        ownerName: ownerName ?? 'Owner',
+        ownerEmail: ownerEmail ?? '',
+      );
       _teamId = team.id;
       _teamName = team.name;
       _description = team.description;
@@ -145,8 +228,21 @@ class TeamProvider extends ChangeNotifier {
       _role = 'owner';
       _department = null;
       _userId = ownerUserId;
-      _members = team.members.map((member) => member.name).where((name) => name.isNotEmpty).toList();
-      _memberInfos = team.members.map((member) => TeamMemberInfo(userId: member.userId, name: member.name, email: member.email, department: member.department, role: member.role)).toList(growable: false);
+      _members = team.members
+          .map((member) => member.name)
+          .where((name) => name.isNotEmpty)
+          .toList();
+      _memberInfos = team.members
+          .map(
+            (member) => TeamMemberInfo(
+              userId: member.userId,
+              name: member.name,
+              email: member.email,
+              department: member.department,
+              role: member.role,
+            ),
+          )
+          .toList(growable: false);
       notifyListeners();
       await _persist();
       return;
@@ -172,16 +268,54 @@ class TeamProvider extends ChangeNotifier {
   }
 
   /// Called when user joins a team as a member.
-  Future<TeamJoinResult> joinTeamAsMember({required String teamName, required String password, required String userId, required String department, required String displayName, required String email}) async {
-    return _joinTeam(teamName: teamName, password: password, userId: userId, department: department, displayName: displayName, email: email, role: 'member');
+  Future<TeamJoinResult> joinTeamAsMember({
+    required String teamName,
+    required String password,
+    required String userId,
+    required String department,
+    required String displayName,
+    required String email,
+  }) async {
+    return _joinTeam(
+      teamName: teamName,
+      password: password,
+      userId: userId,
+      department: department,
+      displayName: displayName,
+      email: email,
+      role: 'member',
+    );
   }
 
   /// Called when user joins a team as a leader.
-  Future<TeamJoinResult> joinTeamAsLeader({required String teamName, required String password, required String userId, required String department, required String displayName, required String email}) async {
-    return _joinTeam(teamName: teamName, password: password, userId: userId, department: department, displayName: displayName, email: email, role: 'leader');
+  Future<TeamJoinResult> joinTeamAsLeader({
+    required String teamName,
+    required String password,
+    required String userId,
+    required String department,
+    required String displayName,
+    required String email,
+  }) async {
+    return _joinTeam(
+      teamName: teamName,
+      password: password,
+      userId: userId,
+      department: department,
+      displayName: displayName,
+      email: email,
+      role: 'leader',
+    );
   }
 
-  Future<TeamJoinResult> _joinTeam({required String teamName, required String password, required String userId, required String department, required String displayName, required String email, required String role}) async {
+  Future<TeamJoinResult> _joinTeam({
+    required String teamName,
+    required String password,
+    required String userId,
+    required String department,
+    required String displayName,
+    required String email,
+    required String role,
+  }) async {
     final normalizedName = teamName.trim().replaceAll(RegExp(r'\s+'), ' ');
     final normalizedPassword = password.trim();
     final normalizedUserId = userId.trim();
@@ -189,13 +323,21 @@ class TeamProvider extends ChangeNotifier {
     final normalizedEmail = email.trim().toLowerCase();
     final normalizedDepartment = department.trim();
 
-    if (normalizedName.isEmpty || normalizedPassword.isEmpty || normalizedUserId.isEmpty || normalizedDisplayName.isEmpty || normalizedEmail.isEmpty) {
+    if (normalizedName.isEmpty ||
+        normalizedPassword.isEmpty ||
+        normalizedUserId.isEmpty ||
+        normalizedDisplayName.isEmpty ||
+        normalizedEmail.isEmpty) {
       return const TeamJoinResult(false, 'All join fields are required.');
     }
     if (!validDepartments.contains(normalizedDepartment)) {
       return const TeamJoinResult(false, 'Select a valid department.');
     }
-    if (!RegExp(r'^TF-[A-Za-z0-9-]{6,}$').hasMatch(normalizedUserId)) {
+    if (_databaseService == null &&
+        !RegExp(r'^TF-[A-Za-z0-9-]{6,}$').hasMatch(normalizedUserId)) {
+      return const TeamJoinResult(false, 'Use a valid TaskFlow user ID.');
+    }
+    if (_databaseService != null && normalizedUserId.length < 6) {
       return const TeamJoinResult(false, 'Use a valid TaskFlow user ID.');
     }
     if (!RegExp(r'^[\w\.\-\+]+@[\w\-]+\.\w{2,}$').hasMatch(normalizedEmail)) {
@@ -203,17 +345,28 @@ class TeamProvider extends ChangeNotifier {
     }
 
     if (_databaseService != null) {
-      final response = await _databaseService.joinTeam(
-        teamName: normalizedName,
-        password: normalizedPassword,
-        userId: normalizedUserId,
-        displayName: normalizedDisplayName,
-        email: normalizedEmail,
-        department: normalizedDepartment,
-        role: role == 'leader' ? TeamRole.leader : TeamRole.member,
-      );
+      final TeamJoinResponse response;
+      try {
+        response = await _databaseService.joinTeam(
+          teamName: normalizedName,
+          password: normalizedPassword,
+          userId: normalizedUserId,
+          displayName: normalizedDisplayName,
+          email: normalizedEmail,
+          department: normalizedDepartment,
+          role: role == 'leader' ? TeamRole.leader : TeamRole.member,
+        );
+      } catch (_) {
+        return const TeamJoinResult(
+          false,
+          'Unable to join team. Check Firestore permissions and try again.',
+        );
+      }
       if (!response.success || response.team == null) {
-        return TeamJoinResult(false, response.message ?? 'Unable to join team.');
+        return TeamJoinResult(
+          false,
+          response.message ?? 'Unable to join team.',
+        );
       }
       _teamId = response.team!.id;
       _teamName = response.team!.name;
@@ -222,8 +375,21 @@ class TeamProvider extends ChangeNotifier {
       _role = role;
       _department = normalizedDepartment;
       _userId = normalizedUserId;
-      _members = response.team!.members.map((member) => member.name).where((name) => name.isNotEmpty).toList();
-      _memberInfos = response.team!.members.map((member) => TeamMemberInfo(userId: member.userId, name: member.name, email: member.email, department: member.department, role: member.role)).toList(growable: false);
+      _members = response.team!.members
+          .map((member) => member.name)
+          .where((name) => name.isNotEmpty)
+          .toList();
+      _memberInfos = response.team!.members
+          .map(
+            (member) => TeamMemberInfo(
+              userId: member.userId,
+              name: member.name,
+              email: member.email,
+              department: member.department,
+              role: member.role,
+            ),
+          )
+          .toList(growable: false);
       notifyListeners();
       await _persist();
       return const TeamJoinResult(true);
@@ -237,16 +403,32 @@ class TeamProvider extends ChangeNotifier {
       return const TeamJoinResult(false, 'The team password is incorrect.');
     }
     if (teamRecord['ownerUserId'] == normalizedUserId) {
-      return const TeamJoinResult(false, 'The team owner cannot join as a member.');
+      return const TeamJoinResult(
+        false,
+        'The team owner cannot join as a member.',
+      );
     }
 
     final directoryMembers = _directoryMembers(teamRecord);
-    final alreadyJoined = directoryMembers.any((member) => member['userId'] == normalizedUserId || member['email'] == normalizedEmail);
+    final alreadyJoined = directoryMembers.any(
+      (member) =>
+          member['userId'] == normalizedUserId ||
+          member['email'] == normalizedEmail,
+    );
     if (alreadyJoined) {
-      return const TeamJoinResult(false, 'This account has already joined this team.');
+      return const TeamJoinResult(
+        false,
+        'This account has already joined this team.',
+      );
     }
 
-    directoryMembers.add({'userId': normalizedUserId, 'name': normalizedDisplayName, 'email': normalizedEmail, 'department': normalizedDepartment, 'role': role});
+    directoryMembers.add({
+      'userId': normalizedUserId,
+      'name': normalizedDisplayName,
+      'email': normalizedEmail,
+      'department': normalizedDepartment,
+      'role': role,
+    });
     teamRecord['members'] = directoryMembers;
 
     _teamName = teamRecord['teamName'] as String;
@@ -281,8 +463,25 @@ class TeamProvider extends ChangeNotifier {
 
   /// Clears all team data (leave or delete team).
   Future<void> clearTeam({bool deleteTeamRecord = false}) async {
-    final currentTeamKey = _teamName == null ? null : _normalizeTeamName(_teamName!);
+    final currentTeamId = _teamId;
+    final currentUserId = _userId;
+    final currentTeamKey = _teamName == null
+        ? null
+        : _normalizeTeamName(_teamName!);
+    if (_databaseService != null && currentTeamId != null) {
+      if (deleteTeamRecord && isOwner) {
+        await _firestore.deleteTeam(teamId: currentTeamId);
+      } else if (currentUserId != null) {
+        await _firestore.leaveTeam(
+          teamId: currentTeamId,
+          userId: currentUserId,
+        );
+      }
+    }
     _teamId = null;
+    _watchedMembersTeamId = null;
+    await _membersSub?.cancel();
+    _membersSub = null;
     _teamName = null;
     _description = null;
     _password = null;
@@ -296,6 +495,12 @@ class TeamProvider extends ChangeNotifier {
     }
     notifyListeners();
     await _persist();
+  }
+
+  @override
+  void dispose() {
+    _membersSub?.cancel();
+    super.dispose();
   }
 }
 
@@ -313,10 +518,27 @@ class TeamMemberInfo {
   final String department;
   final String role;
 
-  const TeamMemberInfo({required this.userId, required this.name, required this.email, required this.department, required this.role});
+  const TeamMemberInfo({
+    required this.userId,
+    required this.name,
+    required this.email,
+    required this.department,
+    required this.role,
+  });
 
-  Map<String, dynamic> toMap() => {'userId': userId, 'name': name, 'email': email, 'department': department, 'role': role};
+  Map<String, dynamic> toMap() => {
+    'userId': userId,
+    'name': name,
+    'email': email,
+    'department': department,
+    'role': role,
+  };
 
-  factory TeamMemberInfo.fromMap(Map<String, dynamic> map) =>
-      TeamMemberInfo(userId: map['userId'] as String? ?? '', name: map['name'] as String? ?? '', email: map['email'] as String? ?? '', department: map['department'] as String? ?? '', role: map['role'] as String? ?? '');
+  factory TeamMemberInfo.fromMap(Map<String, dynamic> map) => TeamMemberInfo(
+    userId: map['userId'] as String? ?? '',
+    name: map['name'] as String? ?? '',
+    email: map['email'] as String? ?? '',
+    department: map['department'] as String? ?? '',
+    role: map['role'] as String? ?? '',
+  );
 }

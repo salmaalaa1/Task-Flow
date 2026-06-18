@@ -31,12 +31,15 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
     super.dispose();
   }
 
-  String _taskFlowUserId(String rawUserId) => 'TF-$rawUserId';
+  String _displayTaskFlowUserId(String rawUserId) => 'TF-$rawUserId';
 
   void _showJoinError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+        content: Text(
+          message,
+          style: GoogleFonts.inter(fontWeight: FontWeight.w500),
+        ),
         backgroundColor: Colors.orange,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -55,7 +58,9 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
     final labelColor = context.textHint;
     final auth = context.watch<AuthProvider>();
     final currentUser = auth.currentUser;
-    final userId = currentUser == null ? '' : _taskFlowUserId(currentUser.id);
+    final displayedUserId = currentUser == null
+        ? ''
+        : _displayTaskFlowUserId(currentUser.id);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -75,12 +80,23 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
             // Title
             Text(
               tr(context, 'join_a_team'),
-              style: GoogleFonts.manrope(fontSize: 32, fontWeight: FontWeight.w800, fontStyle: FontStyle.italic, color: textPrimary, letterSpacing: -0.5),
+              style: GoogleFonts.manrope(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                fontStyle: FontStyle.italic,
+                color: textPrimary,
+                letterSpacing: -0.5,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               tr(context, 'join_team_subtitle'),
-              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400, color: textSecondary, height: 1.5),
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: textSecondary,
+                height: 1.5,
+              ),
             ),
             const SizedBox(height: 28),
 
@@ -91,11 +107,19 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
             // Team Name
             Text(
               tr(context, 'team_name_label'),
-              style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: labelColor, letterSpacing: 1.2),
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: labelColor,
+                letterSpacing: 1.2,
+              ),
             ),
             const SizedBox(height: 10),
             Container(
-              decoration: BoxDecoration(color: fieldColor, borderRadius: BorderRadius.circular(14)),
+              decoration: BoxDecoration(
+                color: fieldColor,
+                borderRadius: BorderRadius.circular(14),
+              ),
               child: TextField(
                 controller: _teamNameCtrl,
                 style: GoogleFonts.inter(fontSize: 15, color: textSecondary),
@@ -103,7 +127,10 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                   hintText: tr(context, 'team_name_hint_join'),
                   hintStyle: GoogleFonts.inter(fontSize: 15, color: labelColor),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 16,
+                  ),
                 ),
               ),
             ),
@@ -112,11 +139,19 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
             // Team Password
             Text(
               tr(context, 'team_password_label'),
-              style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: labelColor, letterSpacing: 1.2),
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: labelColor,
+                letterSpacing: 1.2,
+              ),
             ),
             const SizedBox(height: 10),
             Container(
-              decoration: BoxDecoration(color: fieldColor, borderRadius: BorderRadius.circular(14)),
+              decoration: BoxDecoration(
+                color: fieldColor,
+                borderRadius: BorderRadius.circular(14),
+              ),
               child: TextField(
                 controller: _teamPasswordCtrl,
                 obscureText: _obscurePassword,
@@ -125,10 +160,20 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                   hintText: '••••••••',
                   hintStyle: GoogleFonts.inter(fontSize: 15, color: labelColor),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 16,
+                  ),
                   suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword ? Icons.lock_outline : Icons.lock_open_outlined, size: 20, color: labelColor),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.lock_outline
+                          : Icons.lock_open_outlined,
+                      size: 20,
+                      color: labelColor,
+                    ),
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
                   ),
                 ),
               ),
@@ -140,7 +185,11 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                 const SizedBox(width: 6),
                 Text(
                   tr(context, 'required_verify_association'),
-                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.red.shade400),
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.red.shade400,
+                  ),
                 ),
               ],
             ),
@@ -152,27 +201,57 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
               decoration: BoxDecoration(
                 color: cardColor,
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4))],
+                boxShadow: isDark
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     tr(context, 'user_id_label'),
-                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: labelColor, letterSpacing: 1.2),
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: labelColor,
+                      letterSpacing: 1.2,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(color: fieldColor, borderRadius: BorderRadius.circular(14)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: fieldColor,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     child: Row(
                       children: [
-                        Icon(Icons.fingerprint, size: 24, color: Colors.teal.shade400),
+                        Icon(
+                          Icons.fingerprint,
+                          size: 24,
+                          color: Colors.teal.shade400,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            userId.isEmpty ? tr(context, 'sign_in_required') : userId,
-                            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: textPrimary, letterSpacing: 1),
+                            displayedUserId.isEmpty
+                                ? tr(context, 'sign_in_required')
+                                : displayedUserId,
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: textPrimary,
+                              letterSpacing: 1,
+                            ),
                           ),
                         ),
                         Icon(Icons.edit_outlined, size: 18, color: labelColor),
@@ -187,7 +266,12 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
             // Department Selection
             Text(
               tr(context, 'department_selection'),
-              style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: labelColor, letterSpacing: 1.2),
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: labelColor,
+                letterSpacing: 1.2,
+              ),
             ),
             const SizedBox(height: 12),
             Wrap(
@@ -199,15 +283,26 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                   onTap: () => setState(() => _selectedDept = i),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: isSelected ? Colors.blue : fieldColor,
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: isSelected ? Colors.blue : labelColor.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: isSelected
+                            ? Colors.blue
+                            : labelColor.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Text(
                       tr(context, _departmentKeys[i]),
-                      style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : textSecondary),
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? Colors.white : textSecondary,
+                      ),
                     ),
                   ),
                 );
@@ -221,9 +316,19 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
               height: 56,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF3B82F6), Color(0xFF60A5FA)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF3B82F6), Color(0xFF60A5FA)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
                   borderRadius: BorderRadius.circular(18),
-                  boxShadow: [BoxShadow(color: const Color(0xFF3B82F6).withValues(alpha: 0.3), blurRadius: 16, offset: const Offset(0, 6))],
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
                 child: ElevatedButton(
                   onPressed: () async {
@@ -234,7 +339,7 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                     }
                     final teamName = _teamNameCtrl.text.trim();
                     final teamPassword = _teamPasswordCtrl.text.trim();
-                    final userId = _taskFlowUserId(user.id);
+                    final userId = user.id;
                     final deptNames = ['Programming', 'Media', 'Operation'];
 
                     // Validate all fields
@@ -250,10 +355,19 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
 
                     // Validate against the stored team directory before saving the session.
                     final teamProvider = context.read<TeamProvider>();
-                    final result = await teamProvider.joinTeamAsMember(teamName: teamName, password: teamPassword, userId: userId, department: department, displayName: user.name, email: user.email);
+                    final result = await teamProvider.joinTeamAsMember(
+                      teamName: teamName,
+                      password: teamPassword,
+                      userId: userId,
+                      department: department,
+                      displayName: user.name,
+                      email: user.email,
+                    );
                     if (!context.mounted) return;
                     if (!result.success) {
-                      _showJoinError(result.message ?? tr(context, 'unable_join_team'));
+                      _showJoinError(
+                        result.message ?? tr(context, 'unable_join_team'),
+                      );
                       return;
                     }
 
@@ -261,7 +375,11 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => MemberDashboardScreen(teamName: teamName, department: department, userId: userId),
+                        builder: (_) => MemberDashboardScreen(
+                          teamName: teamName,
+                          department: department,
+                          userId: userId,
+                        ),
                       ),
                       (_) => false,
                     );
@@ -269,17 +387,27 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         tr(context, 'join_a_team'),
-                        style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(width: 8),
-                      const Icon(Icons.arrow_forward, size: 20, color: Colors.white),
+                      const Icon(
+                        Icons.arrow_forward,
+                        size: 20,
+                        color: Colors.white,
+                      ),
                     ],
                   ),
                 ),
