@@ -19,9 +19,9 @@ class Event {
     TimeOfDay? endTime,
     this.color = const Color(0xFF4D41DF),
     this.icon = Icons.event,
-  })  : date = date ?? DateTime.now(),
-        startTime = startTime ?? const TimeOfDay(hour: 9, minute: 0),
-        endTime = endTime ?? const TimeOfDay(hour: 10, minute: 0);
+  }) : date = date ?? DateTime.now(),
+       startTime = startTime ?? const TimeOfDay(hour: 9, minute: 0),
+       endTime = endTime ?? const TimeOfDay(hour: 10, minute: 0);
 
   String get formattedTimeRange {
     String fmt(TimeOfDay t) {
@@ -30,6 +30,7 @@ class Event {
       final p = t.period == DayPeriod.am ? 'AM' : 'PM';
       return '$h:$m $p';
     }
+
     return '${fmt(startTime)} - ${fmt(endTime)}';
   }
 
@@ -38,38 +39,46 @@ class Event {
 
   // --- Serialization ---
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'title': title,
-        'location': location,
-        'date': date.millisecondsSinceEpoch,
-        'startTimeHour': startTime.hour,
-        'startTimeMinute': startTime.minute,
-        'endTimeHour': endTime.hour,
-        'endTimeMinute': endTime.minute,
-        // ignore: deprecated_member_use
-        'colorValue': color.value,
-        'iconCodePoint': icon.codePoint,
-        'iconFontFamily': icon.fontFamily,
-      };
+    'id': id,
+    'title': title,
+    'location': location,
+    'date': date.millisecondsSinceEpoch,
+    'startTimeHour': startTime.hour,
+    'startTimeMinute': startTime.minute,
+    'endTimeHour': endTime.hour,
+    'endTimeMinute': endTime.minute,
+    // ignore: deprecated_member_use
+    'colorValue': color.value,
+    'iconCodePoint': icon.codePoint,
+    'iconFontFamily': icon.fontFamily,
+  };
 
   factory Event.fromMap(Map<dynamic, dynamic> map) => Event(
-        id: map['id'] as String,
-        title: map['title'] as String,
-        location: map['location'] as String? ?? '',
-        date: DateTime.fromMillisecondsSinceEpoch(map['date'] as int),
-        startTime: TimeOfDay(
-          hour: map['startTimeHour'] as int? ?? 9,
-          minute: map['startTimeMinute'] as int? ?? 0,
-        ),
-        endTime: TimeOfDay(
-          hour: map['endTimeHour'] as int? ?? 10,
-          minute: map['endTimeMinute'] as int? ?? 0,
-        ),
-        // ignore: deprecated_member_use
-        color: Color(map['colorValue'] as int? ?? 0xFF4D41DF),
-        icon: IconData(
-          map['iconCodePoint'] as int? ?? Icons.event.codePoint,
-          fontFamily: map['iconFontFamily'] as String? ?? 'MaterialIcons',
-        ),
-      );
+    id: map['id'] as String,
+    title: map['title'] as String,
+    location: map['location'] as String? ?? '',
+    date: DateTime.fromMillisecondsSinceEpoch(map['date'] as int),
+    startTime: TimeOfDay(
+      hour: map['startTimeHour'] as int? ?? 9,
+      minute: map['startTimeMinute'] as int? ?? 0,
+    ),
+    endTime: TimeOfDay(
+      hour: map['endTimeHour'] as int? ?? 10,
+      minute: map['endTimeMinute'] as int? ?? 0,
+    ),
+    // ignore: deprecated_member_use
+    color: Color(map['colorValue'] as int? ?? 0xFF4D41DF),
+    icon: _iconFromMap(map),
+  );
+
+  static IconData _iconFromMap(Map<dynamic, dynamic> map) {
+    final codePoint = map['iconCodePoint'] as int?;
+    final fontFamily = map['iconFontFamily'] as String?;
+    if (codePoint == null ||
+        codePoint == Icons.event.codePoint &&
+            (fontFamily == null || fontFamily == Icons.event.fontFamily)) {
+      return Icons.event;
+    }
+    return Icons.event;
+  }
 }
